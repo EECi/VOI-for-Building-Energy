@@ -129,7 +129,7 @@ if __name__ == '__main__':
     # 5. Perform EVPI computation
     EVPI, Eu_prior, Eu_preposterior, astar_prior = compute_EVPI(borehole_lengths, ks_sampler, utility, n_samples=int(1e5))
 
-    # save computed utility evaluation cache
+    # save utility evaluation cache
     with open(cache_path, 'w') as file:
         json.dump({key:utility.__wrapped__.cache[key] for key in sorted(utility.__wrapped__.cache.keys())}, file, indent=4)
 
