@@ -80,11 +80,10 @@ if __name__ == '__main__':
         energy_usage = abs(load_data*time_step)/1000/aux_cop
         return energy_usage.sum()
 
-    def compute_system_energy_usage(bh_length, ks, load_data):
+    def compute_system_energy_usage(bh_length, ks, load_data, num_boreholes):
         """Compute energy usage by GSHP and auxiliary heating system
         for given borehole length and ground conductivity (ks)."""
         # define building load properties
-        num_boreholes = 9 # number of boreholes supplying building
         max_factor = 4.7484 # represents building with 13.24 kW average, 25.18 kW peak
 
         time_step = load_data['Hours'][1] - load_data['Hours'][0] # hours
@@ -113,12 +112,13 @@ if __name__ == '__main__':
     def utility(bh_length, ks, load_df=load_data):
 
         # set up cost parameters
+        num_boreholes = 9 # number of boreholes supplying building
         bh_cost_per_m = 70 # borehole capital costs per meter length, £/m
         elec_unit_cost = 0.34 # £/kWh
 
-        bh_energy_usage, aux_energy_usage = compute_system_energy_usage(bh_length, ks, load_df) # kWh for both
+        bh_energy_usage, aux_energy_usage = compute_system_energy_usage(bh_length, ks, load_df, num_boreholes) # kWh for both
 
-        return -1*((bh_energy_usage + aux_energy_usage)*elec_unit_cost + bh_length*bh_cost_per_m)
+        return -1*((bh_energy_usage + aux_energy_usage)*elec_unit_cost + bh_length*bh_cost_per_m*num_boreholes)
 
     # load cached utility evaluations if available
     cache_path = os.path.join('data','caches','GSHP_utility_cache_redf-%s.json'%reduction_factor)
