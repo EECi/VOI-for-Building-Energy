@@ -9,11 +9,11 @@ text = """
 
 ~~~mermaid
 flowchart LR
-    d3[Building monitoring\\n system] --> o2
-
+    d1 --> c1{Ventilation\\n energy cost}
     d1[Schedule ventilation\\n rate] --> o1(Risk of\\n infection)
 
-    d1 --> c1{Ventilation\\n energy cost}
+    d3[Building monitoring\\n system] --> o2
+
     o1 --> c2{Staff illness\\n cost}
 
     o2(Building occupancy) --> o1
@@ -32,12 +32,11 @@ flowchart LR
     o1 --> c1{Electricity\\n cost}
 
     o2((&#946)) --> o1((SPF))
+    o0((Heating\\n load)) --> o1((SPF))
     o3((&#945)) --> o1((SPF))
 
     d2 --> o3
     d2[Smart\\n meter] --> c3{Meter\\n cost}
-
-    o0((Heating\\n load)) --> o1((SPF))
 ~~~
 
 ## Ground Source Heatpump System Design
