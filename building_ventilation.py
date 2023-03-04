@@ -64,12 +64,13 @@ if __name__ == '__main__':
         #cost_samples = [sick_days_per_infection*sick_day_cost*infections + venting_costs[vent_rate] for infections in num_infections_samples]
         cost_samples = sick_days_per_infection*sick_day_cost*num_infections_samples + venting_costs[vent_rate]
 
-        return -1*np.mean(cost_samples)
+        return -1*np.mean(cost_samples) # utility [+£/day]
 
     # 5. Perform EVPI computation
-    EVPI, Eu_prior, Eu_preposterior, astar_prior = compute_EVPI(ventilation_rates, occupancy_sampler, utility, n_samples=int(1e5))
+    results = compute_EVPI(ventilation_rates, occupancy_sampler, utility, n_samples=int(1e5))
 
-    print("EVPI: ", np.round(EVPI,3))
-    print("Expected prior utility: ", np.round(Eu_prior,3))
-    print("Expected pre-posterior utility: ", np.round(Eu_preposterior,3))
-    print("Prior action decision: ", astar_prior)
+    print("EVPI: ", np.round(results[0],3))
+    print("Expected prior utility: ", np.round(results[1],3))
+    print("Expected pre-posterior utility: ", np.round(results[2],3))
+    print("Prior action decision: ", results[3])
+    print("Pre-posterior action decision counts: ", results[4])

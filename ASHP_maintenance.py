@@ -48,12 +48,13 @@ if __name__ == '__main__':
         maintenance_cost = maint_unit_cost*maint_freq # £/year
         electricity_cost = annual_load*elec_unit_cost/spf # £/year
 
-        return -1*(maintenance_cost+electricity_cost) # £/year
+        return -1*(maintenance_cost+electricity_cost) # utility [+£/year]
 
     # 5. Perform EVPI computation
-    EVPI, Eu_prior, Eu_preposterior, astar_prior = compute_EVPI(maintenance_freqs, alpha_sampler, utility, n_samples=int(1e6))
+    results = compute_EVPI(maintenance_freqs, alpha_sampler, utility, n_samples=int(1e6))
 
-    print("EVPI: ", np.round(EVPI,3))
-    print("Expected prior utility: ", np.round(Eu_prior,3))
-    print("Expected pre-posterior utility: ", np.round(Eu_preposterior,3))
-    print("Prior action decision: ", astar_prior)
+    print("EVPI: ", np.round(results[0],3))
+    print("Expected prior utility: ", np.round(results[1],3))
+    print("Expected pre-posterior utility: ", np.round(results[2],3))
+    print("Prior action decision: ", results[3])
+    print("Pre-posterior action decision counts: ", results[4])

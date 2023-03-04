@@ -127,13 +127,14 @@ if __name__ == '__main__':
             utility.__wrapped__.cache = json.load(file)
 
     # 5. Perform EVPI computation
-    EVPI, Eu_prior, Eu_preposterior, astar_prior = compute_EVPI(borehole_lengths, ks_sampler, utility, n_samples=int(1e5))
+    results = compute_EVPI(borehole_lengths, ks_sampler, utility, n_samples=int(1e5))
 
     # save utility evaluation cache
     with open(cache_path, 'w') as file:
         json.dump({key:utility.__wrapped__.cache[key] for key in sorted(utility.__wrapped__.cache.keys())}, file, indent=4)
 
-    print("EVPI: ", np.round(EVPI,3))
-    print("Expected prior utility: ", np.round(Eu_prior,3))
-    print("Expected pre-posterior utility: ", np.round(Eu_preposterior,3))
-    print("Prior action decision: ", astar_prior)
+    print("EVPI: ", np.round(results[0],3))
+    print("Expected prior utility: ", np.round(results[1],3))
+    print("Expected pre-posterior utility: ", np.round(results[2],3))
+    print("Prior action decision: ", results[3])
+    print("Pre-posterior action decision counts: ", results[4])

@@ -17,8 +17,9 @@ def compute_EVPI(action_space, sampling_function, utility_function, n_samples=in
     # 3. Perform Pre-Posterior analysis
     pre_posterior_utility_samples = [np.max([utility_function(a,s) for a in action_space]) for s in tqdm(samples)]
     Eu_preposterior = np.mean(pre_posterior_utility_samples)
+    astar_freq_prepost = {action_space[val]:count for (val,count) in zip(*np.unique([np.argmax([utility_function(a,s) for a in action_space]) for s in tqdm(samples)], return_counts=True))}
 
     # 4. Compute EVPI
     EVPI = Eu_preposterior - Eu_prior
 
-    return EVPI, Eu_prior, Eu_preposterior, astar_prior
+    return EVPI, Eu_prior, Eu_preposterior, astar_prior, astar_freq_prepost
