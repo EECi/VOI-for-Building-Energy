@@ -23,7 +23,7 @@ if __name__ == '__main__':
         """Sample values from ground thermal conductivity prior and
         discretise for computational efficiency (enable utility caching)."""
         cont_samples = np.random.normal(mu,sigma,size=n_samples)
-        discr_points = np.arange(0,4,1e-1)
+        discr_points = np.arange(0,4,1e-2)
         return np.array([discr_points[np.argmin(np.abs(discr_points-s))] for s in cont_samples])
 
     # 3. Define system dynamics (intermediate computations)
