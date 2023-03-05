@@ -4,7 +4,7 @@ import numpy as np
 from tqdm import tqdm
 
 
-def compute_EVPI(action_space, sampling_function, utility_function, n_samples=int(1e5)):
+def compute_EVPI(action_space, sampling_function, utility_function, n_samples=int(1e6)):
 
     # 1. Sample from prior distribution of uncertain parameter(s)
     samples = sampling_function(n_samples)

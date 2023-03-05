@@ -67,7 +67,7 @@ if __name__ == '__main__':
         return -1*np.mean(cost_samples) # utility [+£/day]
 
     # 5. Perform EVPI computation
-    results = compute_EVPI(ventilation_rates, occupancy_sampler, utility, n_samples=int(1e5))
+    results = compute_EVPI(ventilation_rates, occupancy_sampler, utility, n_samples=int(1e6))
 
     print("EVPI: ", np.round(results[0],3))
     print("Expected prior utility: ", np.round(results[1],3))

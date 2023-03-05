@@ -127,7 +127,7 @@ if __name__ == '__main__':
             utility.__wrapped__.cache = json.load(file)
 
     # 5. Perform EVPI computation
-    results = compute_EVPI(borehole_lengths, ks_sampler, utility, n_samples=int(1e5))
+    results = compute_EVPI(borehole_lengths, ks_sampler, utility, n_samples=int(1e6))
 
     # save utility evaluation cache
     with open(cache_path, 'w') as file:
