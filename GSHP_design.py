@@ -16,7 +16,7 @@ if __name__ == '__main__':
     np.random.seed(0) # seed sampling
 
     # 1. Define action space
-    borehole_lengths = np.linspace(140,180,9)
+    borehole_lengths = np.linspace(140,200,13)
 
     # 2. Define sampling function for uncertain parameter(s)
     def ks_sampler(n_samples, mu=2, sigma=0.12):
