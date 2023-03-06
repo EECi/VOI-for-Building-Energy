@@ -12,7 +12,7 @@ if __name__ == '__main__':
     np.random.seed(0) # seed sampling
 
     # 1. Define action space
-    maintenance_freqs = np.arange(1,13) # number of maintenance operations per year
+    maintenance_freqs = np.arange(13) # number of maintenance operations per year
 
     # 2. Define sampling function for uncertain parameter(s)
     def alpha_sampler(n_samples, mu=1e-2, sigma=0.25):
