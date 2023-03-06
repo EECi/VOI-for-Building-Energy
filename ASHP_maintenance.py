@@ -36,7 +36,7 @@ if __name__ == '__main__':
     def utility(maint_freq, alpha):
 
         # set up cost parameters
-        elec_unit_cost = 0.51 # £/kWh
+        elec_unit_cost = 0.34 # £/kWh
         annual_load = 1750000 # kWh/year
         maint_unit_cost = 2210 # £ per maintainence operation on all 4 ASHPs
 
