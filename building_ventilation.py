@@ -54,7 +54,7 @@ if __name__ == '__main__':
         # set up cost parameters
         sick_day_cost = 128 # £/day
         sick_days_per_infection = 3
-        venting_costs = {1:6.08, 3:18.25, 5:30.42, 10:60.83} # £/day - pre-computed
+        venting_costs = {1:5.98, 3:17.94, 5:29.91, 10:59.81} # £/day - pre-computed
 
         # compute individual infection probability
         infection_prob = R_function(vent_rate, occ_value)
