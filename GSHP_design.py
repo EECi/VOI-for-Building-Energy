@@ -31,9 +31,9 @@ if __name__ == '__main__':
     # read in heating load data and manipulate (reduce sampling rate & extend to create 50 years of data)
     load_data = pd.read_csv(os.path.join('data','LondonGHELoad_1kW_5yrs_w12h.csv'),header=None,names=['Hours','Load_W'])
     load_data['Load_W']  = load_data['Load_W']*-1 # sign correction
-    reduction_factor = 10 # factor to reduce no. of data rows by using chunk means over rows
+    reduction_factor = 1 # factor to reduce no. of data rows by using chunk means over rows
     load_data['Load_W'] = load_data['Load_W'].rolling(reduction_factor).mean()
-    load_data = load_data.iloc[::10,:]
+    load_data = load_data.iloc[::reduction_factor,:]
     load_data.iloc[0] = 0
     extension_factor = 10 # factor to extend length of reduced dataframe out by, i.e. increase effective duration by factor
     load_data = pd.concat([load_data]*extension_factor, ignore_index=True)
