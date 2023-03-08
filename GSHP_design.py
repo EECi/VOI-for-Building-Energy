@@ -32,7 +32,9 @@ if __name__ == '__main__':
     load_data = pd.read_csv(os.path.join('data','LondonGHELoad_1kW_5yrs_w12h.csv'),header=None,names=['Hours','Load_W'])
     load_data['Load_W']  = load_data['Load_W']*-1 # sign correction
     reduction_factor = 10 # factor to reduce no. of data rows by using chunk means over rows
-    load_data = load_data.groupby(np.arange(len(load_data)) // reduction_factor).mean()
+    load_data['Load_W'] = load_data['Load_W'].rolling(reduction_factor).mean()
+    load_data = load_data.iloc[::10,:]
+    load_data.iloc[0] = 0
     extension_factor = 10 # factor to extend length of reduced dataframe out by, i.e. increase effective duration by factor
     load_data = pd.concat([load_data]*extension_factor, ignore_index=True)
     time_step = load_data['Hours'][1] - load_data['Hours'][0] # hours
