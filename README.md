@@ -1,6 +1,6 @@
 # Too much of a good thing? - The role of Value of Information Analysis in rationalising information gathering for building energy decision making
 
-This repository supports the conference paper submission ... , submitted to ... . It provides ... (code for cals)
+This repository supports the conference paper submission 'The role of Value of Information Analysis in rationalising information gathering for building energy decision making', submitted to 'The 18th International IBPSA Conference and Exhibition - [Building Simulation 2023](https://bs2023.org/index)'. It provides the code used to perform the Value of Information (VoI) computations for the example problems presented in the submission.
 
 ## Technical Requirements
 
