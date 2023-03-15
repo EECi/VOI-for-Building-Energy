@@ -37,6 +37,8 @@ flowchart LR
 
     d2 --> o3
     d2[Smart\\n meter] --> c3{Meter\\n cost}
+
+    o0 --> o3
 ~~~
 
 ## Ground Source Heatpump System Design
