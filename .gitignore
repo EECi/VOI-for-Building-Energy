@@ -15,3 +15,6 @@ venv/
 
 # Mac OS files
 *.DS_STORE
+
+# Copyright sensitive files
+EP_Lamarche.py
