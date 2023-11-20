@@ -1,29 +1,47 @@
-# TValue of Information Analysis for rationalising information gathering in building energy analysis
+## Overview for determining ASHP maintenance uncertain parameter
+This  branch focuses on developing probabilistic models to estimate heating loads, beta parameter variables, and electricity prices. It leverages uncertainty analysis and simulation techniques. Detailed implementation can be found in `uncertainty_VOI.py`.
 
-This repository supports the conference paper submission 'Value of Information Analysis for rationalising information gathering in building energy analysis', submitted to 'The 18th International IBPSA Conference and Exhibition - [Building Simulation 2023](https://bs2023.org/index)'. It provides the code used to perform the Value of Information (VoI) computations for the example problems presented in the submission.
+### 1. Heating Load Calculation
+To compute the heating load with uncertainty, a standard formula is used:
+`Q = m * c_p * ΔT`
+where:
+- `m` is the water flow rate (kg/s or L/s),
+- `c_p` is the specific heat capacity of water (kJ/kg·K), typically 4.18 kJ/kg·K,
+- `ΔT` is the temperature difference between supply and return water (K or °C), assumed to be 10°C.
 
-## Technical Requirements
+In this study, since only one year's heating load data are available, we assume uncertainties in the temperature difference between supply and return water as well as in the flow rate to generate a distribution of the heating load.
+The formula is then rearranged to calculate the flow rate:
 
-Use of this codebase requires Python 3.9 or later.
+`m = Q / (c_p * ΔT)`
 
-```
-conda create --name myenv python>=3.9
-pip install -r requirements.txt
-```
+Given `Q`, `c_p` (4.18 kJ/kg·K for water), and `ΔT` (10°C), we can compute the flow rate `m`. Following this, we estimate the uncertainty in heating load by considering uncertainties in both flow rate and temperature.
 
-## Codebase Structure
+We assumed Sensors Errors following the [European standard EN1434](https://www.kamstrup.com/en-en/insights/blog-series-part-2-a-thermal-energy-meter-you-can-trust).
+- Temperature Sensor Error: 0.5°C
+- Flow Meter Error: 2% 
 
-This repository contains:
+Using Monte Carlo simulation (1000 iterations), the annual total heating load distribution was determined.
 
-- Three scripts for performing the EVPI calculations for each example problem:
-    1. `building_ventilation.py`
-    2. `ASHP_maintenance.py`
-    3. `GSHP_design.py`
-- `evpi.py`, a generic implementation of the EVPI calculation for a general one-stage decision problem with perfect measurements.
-- The `data` directory, containing input data and cached utility evaluations for the GHSP design example.
-- The `plots` directory, containing code to produce the influence diagram figures for each example problem.
-- A helpful caching function wrapper in `utils.caching`
+**Figure 1: Cumulative Heating Load**
+![Cumulative Heating Load](/plots/Cumulative Heating Load.png)
 
-## Note
+### 2. Beta Parameter
+The relationship between the annual number of maintenance activities (`N_m`) and the beta parameter (`β`) is given by:
+`β = (β_a * N_m^γ) / (β_b + N_m^γ)`
+where `β_a = 0.05`, `β_b = 2.5`, `γ = 1.4`, and `N_m` is the annual number of maintenance activities.
 
-The file `models/EP_Lamarche.py` has been removed from the repository due to copyright considerations. The authors will replace its functionality with an equivalent implementation that is openly available, however in the meantime `GSHP_design.py` can be run using the pre-evaluated results of the LaMarche model stored in `data/caches/`.
+We assume that the uncertainty in beta increases with more maintenance activities. This is represented by adding a range of uncertainty proportional to (`N_m`). 
+
+Beta Uncertainty is determined using the following formula:
+`Beta Uncertainty = 0.002 * N_m` (0.2% per maintenance activity)
+
+**Figure 2: Performance Improvement Distribution**
+![Performance Improvement Distribution](/plots/Performance Improvement Distribution.png)
+
+### 3. Electricity Prices
+Electricity price data was downloaded from [Gov.uk](https://www.gov.uk/government/statistical-data-sets/annual-domestic-energy-price-statistics), using the 2022 average annual electricity prices for different payment methods across the UK to fit the distribution of electricity prices.
+
+**Figure 3: 2022 Electricity Prices**
+![2022 Electricity Prices](/plots/2022 Electricity Prices.png)
+
+Note: The electricity price data can be flexibly considered for VOI calculations, such as using data from the past five years (2018-2022) to fit the distribution.
