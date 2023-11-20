@@ -23,7 +23,7 @@ We assumed Sensors Errors following the [European standard EN1434](https://www.k
 Using Monte Carlo simulation (1000 iterations), the annual total heating load distribution was determined.
 
 **Figure 1: Cumulative Heating Load**
-![Cumulative Heating Load](plots/Cumulative Heating Load.png)
+![Cumulative Heating Load](/plots/Cumulative Heating Load.png)
 
 ### 2. Beta Parameter
 The relationship between the annual number of maintenance activities (`N_m`) and the beta parameter (`β`) is given by:
