@@ -31,7 +31,7 @@ plt.ylabel("β")
 plt.legend()
 plt.grid(True)
 plt.tight_layout()
-plt.savefig('plots/Performance improvement distribution.png', dpi=300)
+plt.savefig('plots/Performance_improvement_distribution.png', dpi=300)
 plt.show()
 
 
@@ -107,7 +107,7 @@ plt.title(title)
 plt.xlabel('Cumulative Heating Load (kW)')
 plt.ylabel('Density')
 plt.tight_layout()
-plt.savefig('plots/Cumulative Heating Load.png', dpi=300)
+plt.savefig('plots/Cumulative_Heating_Load.png', dpi=300)
 plt.show()
 
 ##% define the distribution of electicity price
@@ -153,7 +153,7 @@ plt.title(title)
 plt.xlabel('Electricity Price (£/kWh)')
 plt.ylabel('Density')
 plt.tight_layout()
-plt.savefig('plots/2022 Electricity Prices.png', dpi=300)
+plt.savefig('plots/2022_Electricity_Prices.png', dpi=300)
 plt.show()
 
 

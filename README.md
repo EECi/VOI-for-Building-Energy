@@ -23,7 +23,7 @@ We assumed Sensors Errors following the [European standard EN1434](https://www.k
 Using Monte Carlo simulation (1000 iterations), the annual total heating load distribution was determined.
 
 **Figure 1: Cumulative Heating Load**
-![Cumulative Heating Load](/plots/Cumulative Heating Load.png)
+![Cumulative Heating Load](/plots/Cumulative_Heating_Load.png)
 
 ### 2. Beta Parameter
 The relationship between the annual number of maintenance activities (`N_m`) and the beta parameter (`β`) is given by:
@@ -36,12 +36,12 @@ Beta Uncertainty is determined using the following formula:
 `Beta Uncertainty = 0.002 * N_m` (0.2% per maintenance activity)
 
 **Figure 2: Performance Improvement Distribution**
-![Performance Improvement Distribution](/plots/Performance Improvement Distribution.png)
+![Performance Improvement Distribution](/plots/Performance_Improvement_Distribution.png)
 
 ### 3. Electricity Prices
 Electricity price data was downloaded from [Gov.uk](https://www.gov.uk/government/statistical-data-sets/annual-domestic-energy-price-statistics), using the 2022 average annual electricity prices for different payment methods across the UK to fit the distribution of electricity prices.
 
 **Figure 3: 2022 Electricity Prices**
-![2022 Electricity Prices](/plots/2022 Electricity Prices.png)
+![2022 Electricity Prices](/plots/2022_Electricity_Prices.png)
 
 Note: The electricity price data can be flexibly considered for VOI calculations, such as using data from the past five years (2018-2022) to fit the distribution.
