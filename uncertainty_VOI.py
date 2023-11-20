@@ -31,7 +31,7 @@ plt.ylabel("β")
 plt.legend()
 plt.grid(True)
 plt.tight_layout()
-plt.savefig('plots/Performance_improvement_distribution.png', dpi=300)
+plt.savefig('plots/Performance_Improvement_Distribution.png', dpi=300)
 plt.show()
 
 

@@ -36,7 +36,7 @@ Beta Uncertainty is determined using the following formula:
 `Beta Uncertainty = 0.002 * N_m` (0.2% per maintenance activity)
 
 **Figure 2: Performance Improvement Distribution**
-![Performance Improvement Distribution](/plots/Performance_Improvement_Distribution.png)
+![Performance Improvement Distribution](/plots/Performance_improvement_distribution.png)
 
 ### 3. Electricity Prices
 Electricity price data was downloaded from [Gov.uk](https://www.gov.uk/government/statistical-data-sets/annual-domestic-energy-price-statistics), using the 2022 average annual electricity prices for different payment methods across the UK to fit the distribution of electricity prices.
