@@ -179,8 +179,8 @@ filtered_yearly_sum=yearly_sum.loc[2012:2021]
 # Plotting
 plt.figure(figsize=(10, 6))
 plt.plot(filtered_yearly_sum.index, filtered_yearly_sum.values, 'o', label='Data',color='g')
-plt.xlabel('Annual Heating Load (kWh)')
-plt.ylabel('Year')
+plt.xlabel('Year')
+plt.ylabel('Annual Heating Load (kWh)')
 plt.title('Annual Heating Load from 2012-2021')
 plt.tight_layout()
 plt.savefig('plots/Historical_Heating_Load.png', dpi=300)
