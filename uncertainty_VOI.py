@@ -54,6 +54,9 @@ electricity_price_data.columns
 # Filtering the data for the year 2022
 electricity_price_2022 = electricity_price_data[electricity_price_data['Year'] == 2022]
 
+electricity_price_2022 = electricity_price_2022[electricity_price_2022['Region'] != 'Northern Ireland']
+# plt.bar(electricity_price_2022['Region'], electricity_price_2022["Credit: Unit cost (Pence per kWh)"])
+# plt.show()
 # Selecting the requested columns
 credit_prices_2022 = electricity_price_2022["Credit: Unit cost (Pence per kWh)"]
 debit_prices_2022 = electricity_price_2022["Direct debit: Unit cost (Pence per kWh)"]
@@ -79,6 +82,10 @@ title = f"2022 Electricity Prices Distribution: mu = {mu:.4f}, std = {std:.4f}"
 plt.title(title)
 plt.xlabel('Electricity Price (£/kWh)')
 plt.ylabel('Density')
+# Adding a note at the bottom of the figure
+plt.figtext(0.02, 0.01, "Note: The Electricity Prices of Northern Ireland were excluded.",
+            wrap=True, horizontalalignment='left', fontsize=10)
+
 plt.tight_layout()
 plt.savefig('plots/2022_Electricity_Prices.png', dpi=300)
 plt.show()
@@ -93,7 +100,6 @@ import scipy.stats as stats
 from scipy.stats import norm
 # continuous
 AllData = pd.read_csv('Inputs/A011_1389_OLDSCHOOL.csv')
-
 gas_df = AllData[AllData['type.1'] == 'Gas']
 
 locations = gas_df.location.unique()
@@ -172,6 +178,7 @@ Year_sum['Year'] = Year_sum['Time'].dt.year
 
 # calcuate sum
 yearly_sum = Year_sum.groupby('Year')['Gas'].sum()
+
 # save
 yearly_sum.to_csv('Inputs/yearly_sum_'+locations[0]+'_.csv')
 
@@ -185,7 +192,7 @@ plt.title('Annual Heating Load from 2012-2021')
 plt.tight_layout()
 plt.savefig('plots/Historical_Heating_Load.png', dpi=300)
 plt.show()
-
+filtered_yearly_sum=filtered_yearly_sum[filtered_yearly_sum.index!=2020]
 # Fit the data to a normal distribution
 mu, std = stats.norm.fit(filtered_yearly_sum)
 
@@ -203,6 +210,8 @@ title = f"2012-2021 Heating Load Distribution: mu = {mu:.4f}, std = {std:.4f}"
 plt.title(title)
 plt.xlabel('Annual Heating Load (kWh)')
 plt.ylabel('Density')
+plt.figtext(0.02, 0.01, "Note: Heating Load in 2020 was excluded due to Covid impact.",
+            wrap=True, horizontalalignment='left', fontsize=10)
 plt.tight_layout()
 plt.savefig('plots/Cumulative_Heating_Load.png', dpi=300)
 plt.show()

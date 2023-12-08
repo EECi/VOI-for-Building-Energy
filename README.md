@@ -2,10 +2,12 @@
 This  branch focuses on developing probabilistic models to estimate heating loads, beta parameter variables, and electricity prices. It leverages uncertainty analysis and simulation techniques. Detailed implementation can be found in `uncertainty_VOI.py`.
 
 ### 1. Heating Load Uncertainty
-Data on the yearly heating energy consumption of an educational building (A011 old school) in Cambridge was gathered for the period 2012 to 2021. A normal distribution model was applied to characterize the pattern of this heating energy usage.
+Data on the yearly heating energy consumption of an educational building (A011 old school) in Cambridge was gathered for the period 2012 to 2021 as shown in Figure 1.
 
 **Figure 1: Historical Annual Heating Load from 2012 to 2021**
 ![Annual Heating Load](/plots/Historical_Heating_Load.png)
+
+A normal distribution model was applied to characterize the pattern of this heating energy usage as shown in Figure 2. The heating load data in 2022 was excluded due to the impacts of Covid-19.
 
 **Figure 2: Fitted Distribution of Annual Heating Load**
 ![Annual Heating Load](/plots/Cumulative_Heating_Load.png)
@@ -21,7 +23,7 @@ where β<sub>a</sub> = 0.05, β<sub>b</sub>  = 2.5, γ = 1.4, N<sub>m</sub> is t
 ![Performance Improvement Distribution](/plots/Performance_improvement_distribution.png)
 
 ### 3. Electricity Prices
-Electricity price data was downloaded from [Gov.uk](https://www.gov.uk/government/statistical-data-sets/annual-domestic-energy-price-statisticshttps://www.gov.uk/government/statistical-data-sets/annual-domestic-energy-price-statistics), using the 2022 unit electricity costs for different payment methods (i.e.,credit,direct debit and prepayment) across different UK regions (i.e.,East Midlands, Eastern, London, Merseyside & North Wales, North East, North Scotland, North West, Northern Ireland, South East, South Scotland, South Wales, South West, Southern, West Midlands, Yorkshire) to fit the distribution of electricity prices.
+Electricity price data was downloaded from [Gov.uk](https://www.gov.uk/government/statistical-data-sets/annual-domestic-energy-price-statisticshttps://www.gov.uk/government/statistical-data-sets/annual-domestic-energy-price-statistics), using the 2022 unit electricity costs for different payment methods (i.e.,credit,direct debit and prepayment) across different UK regions (i.e.,East Midlands, Eastern, London, Merseyside & North Wales, North East, North Scotland, North West, South East, South Scotland, South Wales, South West, Southern, West Midlands and Yorkshire) to fit the distribution of electricity prices.
 
 **Figure 4: 2022 Electricity Prices**
 ![2022 Electricity Prices](/plots/2022_Electricity_Prices.png)
