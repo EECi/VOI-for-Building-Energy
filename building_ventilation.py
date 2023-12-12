@@ -3,7 +3,7 @@
 import numpy as np
 from functools import cache
 
-from evpi import compute_EVPI
+from voi import compute_EVPI
 
 
 if __name__ == '__main__':

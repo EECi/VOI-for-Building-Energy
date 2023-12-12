@@ -7,7 +7,7 @@ import os
 import json
 from utils import cached
 
-from evpi import compute_EVPI
+from voi import compute_EVPI
 import pygfunction as gt
 from scipy.constants import pi
 
