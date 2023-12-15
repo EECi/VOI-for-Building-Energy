@@ -29,13 +29,13 @@ if __name__ == '__main__':
     # 3. Define system dynamics (intermediate computations)
     # ========================================================================
     # read in heating load data and manipulate (reduce sampling rate & extend to create 50 years of data)
-    load_data = pd.read_csv(os.path.join('data','LondonGHELoad_1kW_5yrs_w12h.csv'),header=None,names=['Hours','Load_W'])
+    load_data = pd.read_csv(os.path.join('data','Simplified_London_new.csv'),header=None,names=['Hours','Load_W'])
     load_data['Load_W']  = load_data['Load_W']*-1 # sign correction
     reduction_factor = 10 # factor to reduce no. of data rows by using chunk means over rows
     load_data['Load_W'] = load_data['Load_W'].rolling(reduction_factor).mean()
     load_data = load_data.iloc[::reduction_factor,:]
     load_data.iloc[0] = 0
-    extension_factor = 10 # factor to extend length of reduced dataframe out by, i.e. increase effective duration by factor
+    extension_factor = 50 # factor to extend length of reduced dataframe out by, i.e. increase effective duration by factor
     load_data = pd.concat([load_data]*extension_factor, ignore_index=True)
     time_step = load_data['Hours'][1] - load_data['Hours'][0] # hours
     load_data['Hours'] = (load_data['Hours'][0] + time_step*np.arange(len(load_data))).astype(int)
@@ -214,7 +214,7 @@ if __name__ == '__main__':
         """Compute energy usage by GSHP and auxiliary heating system
         for given borehole length and ground conductivity (ks)."""
         # define building load properties
-        max_factor = 4.7484 # represents building with 13.24 kW average, 25.18 kW peak
+        max_factor = 61.09925996/num_boreholes # represents building with 13.24 kW average, 25.18 kW peak
 
         time_step = load_data['Hours'][1] - load_data['Hours'][0] # hours
 
@@ -241,7 +241,7 @@ if __name__ == '__main__':
     def utility(bh_length, ks, load_df=load_data):
 
         # set up cost parameters
-        num_boreholes = 9 # number of boreholes supplying building
+        num_boreholes = 12 # number of boreholes supplying building
         bh_cost_per_m = 70 # borehole capital costs per meter length, £/m
         elec_unit_cost = 0.34 # £/kWh
 
