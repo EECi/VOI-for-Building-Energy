@@ -2,5 +2,6 @@ Markdown==3.3.4
 md-mermaid==0.1.1
 numpy
 pandas==1.5.3
+pygfunction==2.2.2
 scipy==1.10.0
 tqdm==4.64.1
