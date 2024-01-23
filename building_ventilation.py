@@ -23,15 +23,15 @@ if __name__ == '__main__':
         """Compute probability of individual infection."""
 
         vent_fresh = vent_rate/3600
-        kappa = 0.39/3600
-        lam = 0.636/3600
+        kappa = 0.39/3600 # gravitational settling
+        lam = 0.636/3600 # viral decay
         loss_rate = vent_fresh + kappa + lam
-        InfectionRate = 0.0218
+        InfectionRate = 0.0218 # prevalence of infection
         NumInfected = InfectionRate*occ_value
-        riskConst = 410
-        inhRate = 0.521/1000
-        N_r = 0.484
-        V = 2000
+        riskConst = 410 # constant calculated for Covid-19
+        inhRate = 0.521/1000 # inhalation rate average sedentary person
+        N_r = 0.484 # calculated using aerosol cut-off of 10 microns and viral load 10^9 copies per ml
+        V = 2000 # Room volume
         t_max = 8*3600
         nstep = 3201
         deltat = t_max/(nstep-1)
