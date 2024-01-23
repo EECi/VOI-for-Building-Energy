@@ -30,7 +30,7 @@ if __name__ == '__main__':
         NumInfected = InfectionRate*occ_value
         riskConst = 410 # constant calculated for Covid-19
         inhRate = 0.521/1000 # inhalation rate average sedentary person
-        N_r = 0.484 # calculated using aerosol cut-off of 10 microns and viral load 10^9 copies per ml
+        N_r = 0.484 # generation rate calculated using aerosol cut-off of 10 microns and viral load 10^9 copies per ml
         V = 2000 # Room volume
         t_max = 8*3600
         nstep = 3201
