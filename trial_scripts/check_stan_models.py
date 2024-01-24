@@ -29,6 +29,8 @@ prior_fit = prior_stan_model.sample(
     show_progress=True
 )
 
+print(prior_fit.summary())
+
 thetas = prior_fit.stan_variable('theta')
 zs = prior_fit.stan_variable('z')
 
@@ -54,7 +56,7 @@ for z in measurements:
         inits={'theta': z},
         iter_warmup=5000, iter_sampling=100000, chains=1,
         show_progress=True
-        )
+    )
 
     hyp_thetas = post_fit.stan_variable('theta')
 

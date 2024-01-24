@@ -51,7 +51,7 @@ def compute_EVPI(action_space, sampling_function, utility_function, n_samples=in
     return EVPI, Eu_prior, Eu_preposterior, astar_prior, astar_freq_prepost
 
 
-def compute_EVII(action_space, prior_sampling_function, measurement_sampling_function, utility_function, n_samples=int(1e6)):
+def compute_EVII(action_space, prior_sampling_function, measurement_sampling_function, utility_function, n_prior_samples=int(1e6), n_measurement_samples=int(1e3)):
     """Compute Expected Value of Imperfect Information (EVII) for a generic 1-stage Bayesian
     decision problem, defined by: action space, prior probabilitic distribution over
     uncertain parameter(s) values and obtained measurement values (prior sampling function),
@@ -91,7 +91,7 @@ def compute_EVII(action_space, prior_sampling_function, measurement_sampling_fun
     """
 
     # 1. Sample from prior distribution of uncertain parameter(s) and obtained measurements
-    thetas, zs = prior_sampling_function(n_samples)
+    thetas, zs = prior_sampling_function(n_prior_samples)
 
     # 2. Perform Prior analysis
     prior_E_utilities = [np.mean([utility_function(a,s) for s in tqdm(thetas)]) for a in action_space]
@@ -99,7 +99,11 @@ def compute_EVII(action_space, prior_sampling_function, measurement_sampling_fun
     astar_prior = action_space[np.argmax(prior_E_utilities)]
 
     # 3. Perform Pre-Posterior analysis
-    posterior_expected_utilties_samples = [[np.mean([utility_function(a,s) for s in measurement_sampling_function(z,n_samples)]) for a in action_space] for z in tqdm(zs)]
+    posterior_expected_utilties_samples = [
+            [np.mean([utility_function(a,s) for s in measurement_sampling_function(z,n_prior_samples)])\
+                for a in action_space]\
+                    for z in tqdm(zs[::n_prior_samples//n_measurement_samples])
+        ]
     pre_posterior_utility_samples = [np.max(l) for l in posterior_expected_utilties_samples]
     Eu_preposterior = np.mean(pre_posterior_utility_samples)
     astar_freq_prepost = {action_space[val]:count for (val,count) in zip(*np.unique([np.argmax(l) for l in posterior_expected_utilties_samples], return_counts=True))}
