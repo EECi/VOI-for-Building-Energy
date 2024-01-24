@@ -18,3 +18,9 @@ venv/
 
 # Copyright sensitive files
 EP_Lamarche.py
+
+## Ignore complied files from Stan
+# Ignore all files in stan_models dir
+stan_models/*
+# Unignore stan files in stan_models dir
+!stan_models/*.stan
