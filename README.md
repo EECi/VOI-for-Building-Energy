@@ -4,10 +4,10 @@ This repository supports the conference paper submission 'Value of Information A
 
 ## Technical Requirements
 
-Use of this codebase requires Python 3.9 or later.
+Use of this codebase requires Python 3.8 or later.
 
 ```
-conda create --name myenv python>=3.9
+conda create --name myenv python>=3.8
 pip install -r requirements.txt
 ```
 
@@ -20,8 +20,10 @@ This repository contains:
     2. `ASHP_maintenance.py`
     3. `GSHP_design.py`
 - `voi.py`, a generic implementation of the EVPI & EVII calculations for a general one-stage Bayesian decision problem.
+- The `stan_models` directory, ...
 - The `data` directory, containing input data and cached utility evaluations for the GHSP design example.
 - The `plots` directory, containing code to produce the influence diagram figures for each example problem.
+- The `trial_scipts` directory, ...
 - A helpful caching function wrapper in `utils.caching`
 
 ## Note
