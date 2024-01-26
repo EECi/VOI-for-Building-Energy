@@ -4,11 +4,12 @@ This repository supports the conference paper submission 'Value of Information A
 
 ## Technical Requirements
 
-Use of this codebase requires Python 3.8 or later.
+Use of this codebase requires Python 3.9 or later.
 
 ```
-conda create --name myenv python>=3.8
+conda create --name myenv python>=3.9
 pip install -r requirements.txt
+conda install -c conda-forge cmdstanpy
 ```
 
 ## Codebase Structure
