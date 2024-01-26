@@ -17,7 +17,7 @@ The relationship between the annual number of maintenance activities (N<sub>m</s
 
 β = (β<sub>a</sub> * N<sub>m</sub><sup>γ</sup>) / (β<sub>b</sub> + N<sub>m</sub><sup>γ</sup>) (1+ϵ)
 
-where β<sub>a</sub> = 0.05, β<sub>b</sub>  = 2.5, γ = 1.4, N<sub>m</sub> is the annual number of maintenance activities, and `ϵ` follows log-normal distribution Lognormal (0,0.1<sup>2</sup>), representing ±10% uncertainty in this case. 
+where β<sub>a</sub> = 0.05, β<sub>b</sub>  = 2.5, γ = 1.4, N<sub>m</sub> is the annual number of maintenance activities, and `ϵ` follows a Gaussian distribution Normal (0,0.1<sup>2</sup>), representing ±10% uncertainty in this case. 
 
 **Figure 3: Performance Improvement Distribution**
 ![Performance Improvement Distribution](/plots/Performance_improvement_distribution.png)
