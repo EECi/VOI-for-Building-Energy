@@ -161,27 +161,21 @@ if __name__ == '__main__':
 
     print("\nPerforming EVII calculations...")
 
-    results_file = os.path.join('reuslts','GSHP_EVII_results.csv')
+    results_file = os.path.join('results','GSHP_EVII_results.csv')
     columns = ['error-sigma','EVII','expected_prior_utility','expected_preposterior_utility','n_prior_samples','n_measurement_samples']
     if not os.path.exists(results_file):
         with open(results_file, 'w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(columns)
 
-    n_prior_samples = int(5e4)
-    n_measurement_samples = int(5e4)
+    n_prior_samples = int(1e6)
+    n_measurement_samples = int(1e6)
 
     test_errors = [0.125,0.085,0.05,0.025]
     for error in test_errors:
         # construct sampling functions for given error
         prior_theta_z_sampler_with_error = lambda n_samples: prior_theta_z_sampler(n_samples, error)
-
-        # reuse posterior samples for computational efficiency
-        # kinda sketch, but I think it's ok - effectively we reuse the computed
-        # mean utility estimate for the posterior decision for each measurement
-        @cached
-        def posterior_theta_sampler_with_error(measurement, n_samples):
-            return posterior_theta_sampler(measurement, n_samples, error)
+        posterior_theta_sampler_with_error = lambda measurement, n_samples: posterior_theta_sampler(measurement, n_samples, error)
 
         EVII_results = compute_EVII(
             borehole_lengths,

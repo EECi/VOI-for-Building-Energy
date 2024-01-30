@@ -1,5 +1,6 @@
 """Perform VoI calculations for general 1-stage Bayesian decision problem."""
 
+from utils import cached
 import numpy as np
 from tqdm import tqdm
 
@@ -99,14 +100,13 @@ def compute_EVII(action_space, prior_sampling_function, measurement_sampling_fun
     astar_prior = action_space[np.argmax(prior_E_utilities)]
 
     # 3. Perform Pre-Posterior analysis
-    posterior_expected_utilties_samples = [
-            [np.mean([utility_function(a,s) for s in measurement_sampling_function(z,n_prior_samples)])\
-                for a in action_space]\
-                    for z in tqdm(zs[::n_prior_samples//n_measurement_samples])
-        ]
-    pre_posterior_utility_samples = [np.max(l) for l in posterior_expected_utilties_samples]
+    measurement_sampling_function = cached(measurement_sampling_function) # use same posterior samples for calculating expected utilities for each action
+    posterior_expected_utilities = cached(lambda z: [np.mean([utility_function(a,s) for s in measurement_sampling_function(z,n_prior_samples)]) for a in action_space])
+    # reuse expected posterior utility values for measurement samples for computational efficiency, but NOTE statistics implications (correlated samples), okay if MC error low enough
+    posterior_expected_utilities_samples = [posterior_expected_utilities(z) for z in tqdm(zs[::n_prior_samples//n_measurement_samples])]
+    pre_posterior_utility_samples = [np.max(l) for l in posterior_expected_utilities_samples]
     Eu_preposterior = np.mean(pre_posterior_utility_samples)
-    astar_freq_prepost = {action_space[val]:count for (val,count) in zip(*np.unique([np.argmax(l) for l in posterior_expected_utilties_samples], return_counts=True))}
+    astar_freq_prepost = {action_space[val]:count for (val,count) in zip(*np.unique([np.argmax(l) for l in posterior_expected_utilities_samples], return_counts=True))}
 
     # 4. Compute EVII
     EVII = Eu_preposterior - Eu_prior
