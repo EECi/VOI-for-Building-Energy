@@ -1,5 +1,8 @@
 """Perform EVPI calculation for air source heatpump maintenance scheduling example."""
 
+import os
+import csv
+
 import numpy as np
 import scipy.stats as stats
 
@@ -32,8 +35,8 @@ if __name__ == '__main__':
         elec_unit_cost_mu = 0.326
         elec_unit_cost_sigma = 0.016
         # annual load - Gaussian
-        annual_load_mu = 85300
-        annual_load_sigma = 5400
+        annual_load_mu = 12560000
+        annual_load_sigma = 1358000
 
         theta_matrix = np.vstack([
             stats.truncnorm(-1*alpha_mu/alpha_sigma,np.inf,loc=alpha_mu,scale=alpha_sigma).rvs(n_samples), # alpha
@@ -91,7 +94,7 @@ if __name__ == '__main__':
         annual_load = theta[4] # kWh/year
 
         # set up cost parameters
-        maint_unit_cost = 552.5*1 # £ per maintainence operation on 1 ASHPs (previously 4)
+        maint_unit_cost = 552.5*4 # £ per maintainence operation on 4 ASHPs
 
         # compute spf
         beta = compute_beta(maint_freq, epsilon)
@@ -124,8 +127,17 @@ if __name__ == '__main__':
 
     print("\nPerforming EVPPI calculations...")
 
+    results_file = os.path.join('results','ASHP_EVPPI_results.csv')
+    columns = ['alpha', 'epsilon', 'spf_dash','EVPPI','expected_prior_utility','expected_preposterior_utility','n_samples']
+    if not os.path.exists(results_file):
+        with open(results_file, 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(columns)
+
     parameters = ['alpha', 'epsilon', 'spf_dash', 'elec_unit_cost', 'annual_load']
     combs = [[0],[1],[2],[0,1],[0,2],[1,2],[0,1,2]]
+
+    n_samples = int(1e3)
 
     for comb in combs:
         to_measure = [True if i in comb else False for i in range(len(parameters))]
@@ -138,11 +150,16 @@ if __name__ == '__main__':
             prior_sampler,
             partial_perfect_info_theta_sampler,
             utility,
-            n_prior_samples=int(1e3),
-            n_measurement_samples=int(1e3)
+            n_prior_samples=n_samples,
+            n_measurement_samples=n_samples
         )
 
         print("\nMeasured params: %s"%[parameters[i] for i in comb])
         print("EVPPI: ", np.round(results[0],3))
         print("Expected prior utility: ", np.round(results[1],3))
         print("Expected pre-posterior utility: ", np.round(results[2],3))
+
+        # save results
+        with open(results_file, 'a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow([*[perfect_info_params[param] for param in ['alpha','epsilon','spf_dash']], results[0], results[1], results[2], n_samples])
