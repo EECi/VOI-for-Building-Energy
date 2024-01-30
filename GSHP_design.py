@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 
 import os
+import csv
 import json
 from utils import cached
 
@@ -18,7 +19,7 @@ if __name__ == '__main__':
     np.random.seed(0) # seed sampling
 
     # 1. Define action space
-    borehole_lengths = np.linspace(140,200,13)
+    borehole_lengths = np.linspace(110,190,17)
 
     # 2. Define sampling functions for uncertain parameter(s)
     prior_mu = 1.94
@@ -160,6 +161,16 @@ if __name__ == '__main__':
 
     print("\nPerforming EVII calculations...")
 
+    results_file = os.path.join('reuslts','GSHP_EVII_results.csv')
+    columns = ['error-sigma','EVII','expected_prior_utility','expected_preposterior_utility','n_prior_samples','n_measurement_samples']
+    if not os.path.exists(results_file):
+        with open(results_file, 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(columns)
+
+    n_prior_samples = int(5e4)
+    n_measurement_samples = int(5e4)
+
     test_errors = [0.125,0.085,0.05,0.025]
     for error in test_errors:
         # construct sampling functions for given error
@@ -177,13 +188,19 @@ if __name__ == '__main__':
             prior_theta_z_sampler_with_error,
             posterior_theta_sampler_with_error,
             utility,
-            n_prior_samples=int(1e5), n_measurement_samples=int(1e5)
+            n_prior_samples=n_prior_samples,
+            n_measurement_samples=n_measurement_samples
         )
 
         print("\nMesurement error: %s%%"%np.round(error*100,1))
         print("EVII: ", np.round(EVII_results[0],3))
         print("Expected prior utility: ", np.round(EVII_results[1],3))
         print("Expected pre-posterior utility: ", np.round(EVII_results[2],3))
+
+        # save results
+        with open(results_file, 'a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow([error, EVII_results[0], EVII_results[1], EVII_results[2], n_prior_samples, n_measurement_samples])
     # ========================================================================
 
     # save utility evaluation cache
