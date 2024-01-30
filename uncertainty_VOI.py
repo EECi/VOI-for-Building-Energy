@@ -99,7 +99,8 @@ from datetime import datetime, timedelta
 import scipy.stats as stats
 from scipy.stats import norm
 # continuous
-AllData = pd.read_csv('Inputs/A011_1389_OLDSCHOOL.csv')
+#AllData = pd.read_csv('Inputs/A011_1389_OLDSCHOOL.csv')
+AllData = pd.read_csv('Inputs/E025_Medical_Research_Council_Toxicology_Unit.csv')
 gas_df = AllData[AllData['type.1'] == 'Gas']
 
 locations = gas_df.location.unique()
@@ -147,8 +148,8 @@ gas_data.rename(columns={'00:30': '00:00:00', '01:00': '00:30:00',
 # Re-arrange timestamp
 gas_melt = pd.melt(gas_data, id_vars = ['date'])
 
-s = pd.to_datetime(gas_melt['date'], format='%Y-%m-%d %H:%M:%S').dt.date
-
+#s = pd.to_datetime(gas_melt['date'], format='%Y-%m-%d %H:%M:%S').dt.date
+s = pd.to_datetime(gas_melt['date'], format='%Y-%m-%d').dt.date
 t = pd.to_datetime(gas_melt['variable']).dt.time
 
 nd = np.size(gas_melt, axis=0)
@@ -180,15 +181,15 @@ Year_sum['Year'] = Year_sum['Time'].dt.year
 yearly_sum = Year_sum.groupby('Year')['Gas'].sum()
 
 # save
-yearly_sum.to_csv('Inputs/yearly_sum_'+locations[0]+'_.csv')
+#yearly_sum.to_csv('Inputs/yearly_sum_'+locations[0]+'_.csv')
 
-filtered_yearly_sum=yearly_sum.loc[2012:2021]
+filtered_yearly_sum=yearly_sum.loc[2011:2017]
 # Plotting
 plt.figure(figsize=(10, 6))
 plt.plot(filtered_yearly_sum.index, filtered_yearly_sum.values, 'o', label='Data',color='g')
 plt.xlabel('Year')
 plt.ylabel('Annual Heating Load (kWh)')
-plt.title('Annual Heating Load from 2012-2021')
+plt.title('Annual Heating Load from 2011-2017')
 plt.tight_layout()
 plt.savefig('plots/Historical_Heating_Load.png', dpi=300)
 plt.show()
@@ -206,12 +207,12 @@ x = np.linspace(xmin, xmax, 100)
 p = norm.pdf(x, mu, std)
 plt.plot(x, p, 'k', linewidth=2)
 
-title = f"2012-2021 Heating Load Distribution: mu = {mu:.4f}, std = {std:.4f}"
+title = f"2011-2017 Heating Load Distribution: mu = {mu:.4f}, std = {std:.4f}"
 plt.title(title)
 plt.xlabel('Annual Heating Load (kWh)')
 plt.ylabel('Density')
-plt.figtext(0.02, 0.01, "Note: Heating Load in 2020 was excluded due to Covid impact.",
-            wrap=True, horizontalalignment='left', fontsize=10)
+# plt.figtext(0.02, 0.01, "Note: Heating Load in 2020 was excluded due to Covid impact.",
+#             wrap=True, horizontalalignment='left', fontsize=10)
 plt.tight_layout()
 plt.savefig('plots/Cumulative_Heating_Load.png', dpi=300)
 plt.show()

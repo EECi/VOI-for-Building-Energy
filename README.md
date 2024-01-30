@@ -2,12 +2,12 @@
 This  branch focuses on developing probabilistic models to estimate heating loads, beta parameter variables, and electricity prices. It leverages uncertainty analysis and simulation techniques. Detailed implementation can be found in `uncertainty_VOI.py`.
 
 ### 1. Heating Load Uncertainty
-Data on the yearly heating energy consumption of an educational building (A011 old school) in Cambridge was gathered for the period 2012 to 2021 as shown in Figure 1.
+Data on the yearly heating energy consumption of an educational building (E025 Medical Research Council Toxicology Unit) in Cambridge was gathered for the period 2011 to 2017 as shown in Figure 1.
 
-**Figure 1: Historical Annual Heating Load from 2012 to 2021**
+**Figure 1: Historical Annual Heating Load from 2011 to 2017**
 ![Annual Heating Load](/plots/Historical_Heating_Load.png)
 
-A normal distribution model was applied to characterize the pattern of this heating energy usage as shown in Figure 2. The heating load data in 2022 was excluded due to the impacts of Covid-19.
+A normal distribution model was applied to characterize the pattern of this heating energy usage as shown in Figure 2. 
 
 **Figure 2: Fitted Distribution of Annual Heating Load**
 ![Annual Heating Load](/plots/Cumulative_Heating_Load.png)
