@@ -27,18 +27,21 @@ flowchart LR
 ~~~mermaid
 flowchart LR
     d1[Maintenance\\n frequency] --> c2{Maintenance\\n cost}
-    d1 --> o2(("#946;"))
+    d1 --> o2((&beta;))
+    o6((&epsilon;)) --> o2
+
+    o0((Heating\\n load)) --> c1
 
     o1 --> c1{Electricity\\n cost}
 
-    o2((&#946)) --> o1((SPF))
-    o0((Heating\\n load)) --> o1((SPF))
-    o3((&#945)) --> o1((SPF))
+    o2 --> o1((SPF))
+    o5((SPF')) --> o1
+    o3((&alpha;)) --> o1
+
+    o4((Electricity\\n price)) --> c1
 
     d2 --> o3
     d2[Smart\\n meter] --> c3{Meter\\n cost}
-
-    o0 --> o3
 ~~~
 
 ## Ground Source Heatpump System Design
