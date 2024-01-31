@@ -3,13 +3,15 @@
 Taken from - https://stackoverflow.com/questions/15585493/store-the-cache-to-a-file-functools-lru-cache-in-python-3-2.
 """
 
+from collections.abc import Iterable
 from functools import wraps
 
 def cached(func):
     func.cache = {}
     @wraps(func)
     def wrapper(*args):
-        key = '-'.join([str(arg) for arg in args])
+        # unwrap list of args into key, unwrapping any iterable args
+        key = '-'.join([str(v) for arg in args for v in (arg if isinstance(arg,Iterable) else [arg])])
         try:
             return func.cache[key]
         except KeyError:
