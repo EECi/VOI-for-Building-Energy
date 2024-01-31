@@ -168,8 +168,8 @@ if __name__ == '__main__':
             writer = csv.writer(file)
             writer.writerow(columns)
 
-    n_prior_samples = int(1e6)
-    n_measurement_samples = int(1e6)
+    n_prior_samples = int(1e5)
+    n_measurement_samples = int(1e5)
 
     test_errors = [0.125,0.085,0.05,0.025]
     for error in test_errors:
