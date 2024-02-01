@@ -45,7 +45,7 @@ def compute_EVPI(action_space, sampling_function, utility_function, n_samples=in
     pre_posterior_utility_samples = [np.max(l) for l in posterior_utilities_samples]
     Eu_preposterior = np.mean(pre_posterior_utility_samples)
     astar_freq_prepost = {action_space[val]:count for (val,count) in zip(*np.unique([np.argmax(l) for l in posterior_utilities_samples], return_counts=True))}
-    prepost_std_error = np.sqrt(pre_posterior_utility_samples)/n_samples
+    prepost_std_error = np.std(pre_posterior_utility_samples)/n_samples
 
     # 4. Compute EVPI
     EVPI = Eu_preposterior - Eu_prior
@@ -108,7 +108,7 @@ def compute_EVII(action_space, prior_sampling_function, measurement_sampling_fun
     pre_posterior_utility_samples = [np.max(l) for l in posterior_expected_utilities_samples]
     Eu_preposterior = np.mean(pre_posterior_utility_samples)
     astar_freq_prepost = {action_space[val]:count for (val,count) in zip(*np.unique([np.argmax(l) for l in posterior_expected_utilities_samples], return_counts=True))}
-    prepost_std_error = np.sqrt(pre_posterior_utility_samples)/n_measurement_samples
+    prepost_std_error = np.std(pre_posterior_utility_samples)/n_measurement_samples
 
     # 4. Compute EVII
     EVII = Eu_preposterior - Eu_prior
