@@ -159,10 +159,10 @@ if __name__ == '__main__':
 
     print("\nPerforming EVPPI calculations...")
 
-    parameters = ['alpha', 'epsilon', 'spf_dash']
+    parameters = ['alpha', 'epsilon', 'spf_dash', 'elec_unit_cost', 'annual_load']
     combs = [[0],[1],[2],[0,1],[0,2],[1,2],[0,1,2]]
 
-    n_prior_samples = int(1e7)
+    n_prior_samples = int(1e5)
     n_measurement_samples = int(1e5)
 
     for comb in combs:

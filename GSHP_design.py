@@ -6,13 +6,15 @@ import pandas as pd
 import os
 import csv
 import json
+import itertools
+from tqdm import tqdm
 from utils import cached
 
 import logging
 from cmdstanpy import CmdStanModel
 
 from models import create_BH_pyg, simulate_BH_pyg, find_factor_BH, compute_bh_energy_usage, compute_aux_energy_usage
-from voi import compute_EVPI, compute_EVII
+from voi import compute_EVPI, compute_EVII, fast_EVPI, fast_EVII
 
 if __name__ == '__main__':
 
@@ -24,7 +26,8 @@ if __name__ == '__main__':
     # 2. Define sampling functions for uncertain parameter(s)
     prior_mu = 1.94
     prior_sigma = 0.31
-    discr_points = np.arange(0,4,1e-2) # discretisation points for ground thermal conductivity
+    discr_delta = 1e-2
+    discr_points = np.arange(discr_delta,4,discr_delta) # discretisation points for ground thermal conductivity
 
     # Turn off cmdstan info logging
     stan_log = False
@@ -130,22 +133,45 @@ if __name__ == '__main__':
 
         return -1*((bh_energy_usage + aux_energy_usage)*elec_unit_cost + bh_length*bh_cost_per_m*num_boreholes)
 
+    print("\nPre-filling utility cache...")
     # load cached utility evaluations if available
     cache_path = os.path.join('data','caches','GSHP_utility_cache_redf-%s.json'%reduction_factor)
     if os.path.exists(cache_path):
         with open(cache_path, 'r') as file:
             utility.__wrapped__.cache = json.load(file)
 
+    # evaluate utility for all action-uncertainty space to fill cache
+    for bh_lenth, k in tqdm(itertools.product(borehole_lengths, discr_points), total=len(borehole_lengths)*len(discr_points)):
+        utility(bh_lenth, k)
+
+    # save utility evaluation cache
+    with open(cache_path, 'w') as file:
+        json.dump({key:utility.__wrapped__.cache[key] for key in sorted(utility.__wrapped__.cache.keys())}, file, indent=4)
+
 
     # 5. Perform VOI calculations
     # ========================================================================
+    results_file = os.path.join('results','GSHP_EVII_results.csv')
+    columns = ['error-sigma','EVII','expected_prior_utility','expected_preposterior_utility','n_prior_samples','n_measurement_samples']
+    if not os.path.exists(results_file):
+        with open(results_file, 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(columns)
+
+
+    @np.vectorize
+    def vec_utility(bh_length, k):
+        return utility(bh_length, k)
+
     print("\nPerforming EVPI calculation...")
 
-    EVPI_results = compute_EVPI(
+    n_samples = int(1e6)
+
+    EVPI_results = fast_EVPI(
         borehole_lengths,
         prior_ks_sampler,
-        utility,
-        n_samples=int(1e6)
+        vec_utility,
+        n_samples=n_samples
     )
 
     print("EVPI: ", np.round(EVPI_results[0],3))
@@ -154,19 +180,13 @@ if __name__ == '__main__':
     print("Prior action decision: ", EVPI_results[3])
     print("Pre-posterior action decision counts: ", EVPI_results[4])
 
-    # save utility evaluation cache
-    with open(cache_path, 'w') as file:
-        json.dump({key:utility.__wrapped__.cache[key] for key in sorted(utility.__wrapped__.cache.keys())}, file, indent=4)
+    # save results
+    with open(results_file, 'a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['EVPI', EVPI_results[0], EVPI_results[1], EVPI_results[2], n_samples, 'N/A', EVPI_results[5]])
 
 
     print("\nPerforming EVII calculations...")
-
-    results_file = os.path.join('results','GSHP_EVII_results.csv')
-    columns = ['error-sigma','EVII','expected_prior_utility','expected_preposterior_utility','n_prior_samples','n_measurement_samples']
-    if not os.path.exists(results_file):
-        with open(results_file, 'w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(columns)
 
     n_prior_samples = int(1e5)
     n_measurement_samples = int(1e5)
@@ -177,11 +197,11 @@ if __name__ == '__main__':
         prior_theta_z_sampler_with_error = lambda n_samples: prior_theta_z_sampler(n_samples, error)
         posterior_theta_sampler_with_error = lambda measurement, n_samples: posterior_theta_sampler(measurement, n_samples, error)
 
-        EVII_results = compute_EVII(
+        EVII_results = fast_EVII(
             borehole_lengths,
             prior_theta_z_sampler_with_error,
             posterior_theta_sampler_with_error,
-            utility,
+            vec_utility,
             n_prior_samples=n_prior_samples,
             n_measurement_samples=n_measurement_samples
         )
@@ -197,7 +217,3 @@ if __name__ == '__main__':
             writer = csv.writer(file)
             writer.writerow([error, EVII_results[0], EVII_results[1], EVII_results[2], n_prior_samples, n_measurement_samples, EVII_results[5]])
     # ========================================================================
-
-    # save utility evaluation cache
-    with open(cache_path, 'w') as file:
-        json.dump({key:utility.__wrapped__.cache[key] for key in sorted(utility.__wrapped__.cache.keys())}, file, indent=4)

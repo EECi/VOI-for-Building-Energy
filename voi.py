@@ -174,8 +174,9 @@ def fast_EVII(action_space, prior_sampling_function, measurement_sampling_functi
         return [np.mean(utility_function(a,posterior_samples.T)) for a in action_space]
 
     thinned_zs = [z for z in zs[::n_prior_samples//n_measurement_samples]]
-    with Pool(processes=min(os.cpu_count(),16)) as pool:
-        posterior_expected_utilities_samples = list(tqdm(pool.imap(compute_posterior_expected_utilities, thinned_zs, chunksize=100), total=len(thinned_zs)))
+    n_workers = min(os.cpu_count(),16)
+    with Pool(processes=n_workers) as pool:
+        posterior_expected_utilities_samples = list(tqdm(pool.imap(compute_posterior_expected_utilities, thinned_zs, chunksize=n_workers*5), total=len(thinned_zs)))
         pool.close()
         pool.join()
     pre_posterior_utility_samples = np.max(posterior_expected_utilities_samples,axis=1)
