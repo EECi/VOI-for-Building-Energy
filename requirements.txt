@@ -5,3 +5,5 @@ pandas==1.5.3
 pygfunction==2.2.2
 scipy==1.10.0
 tqdm==4.64.1
+multiprocess==0.70.16
+numba==0.59.0
