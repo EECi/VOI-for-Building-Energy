@@ -190,11 +190,12 @@ if __name__ == '__main__':
         print("EVII: ", np.round(EVII_results[0],3))
         print("Expected prior utility: ", np.round(EVII_results[1],3))
         print("Expected pre-posterior utility: ", np.round(EVII_results[2],3))
+        print("Pre-posterior std error: ", np.round(EVII_results[5],3))
 
         # save results
         with open(results_file, 'a', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow([error, EVII_results[0], EVII_results[1], EVII_results[2], n_prior_samples, n_measurement_samples])
+            writer.writerow([error, EVII_results[0], EVII_results[1], EVII_results[2], n_prior_samples, n_measurement_samples, EVII_results[5]])
     # ========================================================================
 
     # save utility evaluation cache

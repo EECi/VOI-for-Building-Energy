@@ -7,6 +7,7 @@ import numpy as np
 import scipy.stats as stats
 
 from voi import compute_EVPI, compute_EVII
+from utils import cached
 
 
 if __name__ == '__main__':
@@ -61,9 +62,9 @@ if __name__ == '__main__':
     def prior_theta_and_partial_perfect_z_sampler(n_samples, perfect_info_params=None):
         """Sample thetas and zs for partial perfect information for specified parameters."""
 
-        thetas = prior_theta_sampler(n_samples)
+        thetas = [t[:3] for t in prior_theta_sampler(n_samples)]
 
-        parameters = ['alpha', 'epsilon', 'spf_dash', 'elec_unit_cost', 'annual_load']
+        parameters = ['alpha', 'epsilon', 'spf_dash']
         if perfect_info_params is None:
             perfect_info_params = {param: False for param in parameters}
         measure_params = np.array(list(perfect_info_params.values()),dtype=bool)
@@ -75,7 +76,7 @@ if __name__ == '__main__':
     def partial_perfect_info_theta_sampler(measurement, n_samples):
         """Sample thetas for case of partial perfect information with specified measurement."""
 
-        thetas = prior_theta_sampler(n_samples)
+        thetas = [t[:3] for t in prior_theta_sampler(n_samples)]
         thetas_with_perfect_info = [np.where(np.isnan(measurement), t, measurement) for t in thetas]
 
         return thetas_with_perfect_info
@@ -103,7 +104,7 @@ if __name__ == '__main__':
         annual_load = theta[4] # kWh/year
 
         # set up cost parameters
-        maint_unit_cost = 552.5*4 # £ per maintainence operation on 4 ASHPs
+        maint_unit_cost = 552.5*30 # £ per maintainence operation on 10 ASHPs (originally 4 for 1.75GWh/year)
 
         # compute spf
         beta = compute_beta(maint_freq, epsilon)
@@ -115,11 +116,19 @@ if __name__ == '__main__':
 
         return -1*(maintenance_cost+electricity_cost) # utility [+£/year]
 
+    @cached
+    def simplified_utility(maint_freq, theta):
+        """Utility function for simplified problem with deterministic
+        electricity price and heating load."""
+        elec_unit = 0.326
+        annual_load = 12560000
+        return utility(maint_freq, [*theta[:3], elec_unit, annual_load])
+
 
     # 5. Perform VOI calculations
     # ========================================================================
     results_file = os.path.join('results','ASHP_EVPPI_results.csv')
-    columns = ['alpha', 'epsilon', 'spf_dash','EVPPI','expected_prior_utility','expected_preposterior_utility','n_samples']
+    columns = ['alpha', 'epsilon', 'spf_dash','EVPPI','expected_prior_utility','expected_preposterior_utility','n_prior_samples','n_measurement_samples','prepost_std_error']
     if not os.path.exists(results_file):
         with open(results_file, 'w', newline='') as file:
             writer = csv.writer(file)
@@ -153,11 +162,13 @@ if __name__ == '__main__':
 
 
     print("\nPerforming EVPPI calculations...")
+    # Remove uncertainty in electricity price and heating load to simplify problem
 
-    parameters = ['alpha', 'epsilon', 'spf_dash', 'elec_unit_cost', 'annual_load']
+    parameters = ['alpha', 'epsilon', 'spf_dash']
     combs = [[0],[1],[2],[0,1],[0,2],[1,2],[0,1,2]]
 
-    n_samples = int(1e5)
+    n_prior_samples = int(1e5)
+    n_measurement_samples = int(1e4)
 
     for comb in combs:
         for seed in range(10):
@@ -172,17 +183,18 @@ if __name__ == '__main__':
                 maintenance_freqs,
                 prior_sampler,
                 partial_perfect_info_theta_sampler,
-                utility,
-                n_prior_samples=n_samples,
-                n_measurement_samples=n_samples
+                simplified_utility,
+                n_prior_samples=n_prior_samples,
+                n_measurement_samples=n_measurement_samples
             )
 
             print("\nMeasured params: %s"%[parameters[i] for i in comb])
             print("EVPPI: ", np.round(results[0],3))
             print("Expected prior utility: ", np.round(results[1],3))
             print("Expected pre-posterior utility: ", np.round(results[2],3))
+            print("Pre-posterior std error: ", np.round(results[5],3))
 
             # save results
             with open(results_file, 'a', newline='') as file:
                 writer = csv.writer(file)
-                writer.writerow([*[perfect_info_params[param] for param in ['alpha','epsilon','spf_dash']], results[0], results[1], results[2], n_samples])
+                writer.writerow([*[perfect_info_params[param] for param in ['alpha','epsilon','spf_dash']], results[0], results[1], results[2], n_prior_samples, n_measurement_samples, results[5]])
