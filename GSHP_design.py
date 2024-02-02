@@ -27,7 +27,7 @@ if __name__ == '__main__':
     prior_mu = 1.94
     prior_sigma = 0.31
     discr_delta = 1e-2
-    discr_points = np.arange(discr_delta,4,discr_delta) # discretisation points for ground thermal conductivity
+    discr_points = np.round(np.arange(discr_delta,4,discr_delta),6) # discretisation points for ground thermal conductivity
 
     # Turn off cmdstan info logging
     stan_log = False
