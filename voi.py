@@ -5,6 +5,8 @@ from multiprocess import Pool
 import numpy as np
 from tqdm import tqdm
 
+from utils import cached
+
 
 def compute_EVPI(action_space, sampling_function, utility_function, n_samples=int(1e6)):
     """Compute Expected Value of Perfect Information (EVPI) for a generic 1-stage Bayesian
@@ -147,7 +149,7 @@ def fast_EVPI(action_space, sampling_function, utility_function, n_samples=int(1
     return EVPI, Eu_prior, Eu_preposterior, astar_prior, astar_freq_prepost, prepost_std_error
 
 
-def fast_EVII(action_space, prior_sampling_function, measurement_sampling_function, utility_function, n_prior_samples=int(1e6), n_measurement_samples=int(1e3), report_prepost_freqs=False):
+def fast_EVII(action_space, prior_sampling_function, measurement_sampling_function, utility_function, n_prior_samples=int(1e6), n_measurement_samples=int(1e3), mproc=False, report_prepost_freqs=False):
     """Compute EVII using tricks for computational efficiency.
     
     NOTE:
@@ -174,11 +176,18 @@ def fast_EVII(action_space, prior_sampling_function, measurement_sampling_functi
         return [np.mean(utility_function(a,posterior_samples.T)) for a in action_space]
 
     thinned_zs = [z for z in zs[::n_prior_samples//n_measurement_samples]]
+
     n_workers = min(os.cpu_count(),16)
-    with Pool(processes=n_workers) as pool:
-        posterior_expected_utilities_samples = list(tqdm(pool.imap(compute_posterior_expected_utilities, thinned_zs, chunksize=n_workers*5), total=len(thinned_zs)))
-        pool.close()
-        pool.join()
+    if mproc:
+        with Pool(processes=n_workers) as pool:
+            posterior_expected_utilities_samples = list(tqdm(pool.imap(compute_posterior_expected_utilities, thinned_zs, chunksize=n_workers*5), total=len(thinned_zs)))
+            pool.close()
+            pool.join()
+    else:
+        compute_posterior_expected_utilities = cached(compute_posterior_expected_utilities)
+        # reuse posterior expected utilities, NOTE this reduces the quality of the MC estimate of preposterior expected utility
+        posterior_expected_utilities_samples = [compute_posterior_expected_utilities(z) for z in tqdm(thinned_zs)]
+
     pre_posterior_utility_samples = np.max(posterior_expected_utilities_samples,axis=1)
     Eu_preposterior = np.mean(pre_posterior_utility_samples)
     astar_freq_prepost = {action_space[val]:count for (val,count) in zip(*np.unique([np.argmax(l) for l in posterior_expected_utilities_samples], return_counts=True))}  if report_prepost_freqs else None
