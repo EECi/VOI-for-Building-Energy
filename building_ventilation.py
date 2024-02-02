@@ -1,11 +1,9 @@
 """Perform EVPI calculation for building ventilation scheduling example."""
 
 import numpy as np
-import scipy.stats as stats
 from functools import cache
-from utils import cached
 
-from voi import compute_EVPI
+from voi import fast_EVPI
 
 
 if __name__ == '__main__':
@@ -50,14 +48,7 @@ if __name__ == '__main__':
         return r[-1]
 
     # 4. Define utility function
-    def utility(vent_rate, occupancy, params):
-
-        # grab param values
-        floor_area = params['floor_area']
-        elec_cost = params['elec_cost']
-        N_r = params['N_r']
-        InfectionRate = params['InfectionRate']
-
+    def utility(vent_rate, occupancy, floor_area, elec_cost, N_r, InfectionRate):
 
         # set up cost parameters
         sick_day_cost = 128 # £/day
@@ -97,24 +88,19 @@ if __name__ == '__main__':
 
         floor_area = floor_area_per_person*n_staff
 
-        params = {
-            'floor_area': floor_area,
-            'elec_cost': elec_cost,
-            'N_r': N_r,
-            'InfectionRate': InfectionRate,
-        }
-
         def scenario_theta_sampler(n_samples):
             return prior_theta_sampler(n_samples, n_staff)
 
+        @np.vectorize
         def scenario_utility(ventilation_rates, theta):
-            return utility(ventilation_rates, theta, params)
+            return utility(ventilation_rates, theta, floor_area, elec_cost, N_r, InfectionRate)
 
-        results = compute_EVPI(
+        results = fast_EVPI(
             ventilation_rates,
             scenario_theta_sampler,
             scenario_utility,
-            n_samples
+            n_samples,
+            report_prepost_freqs=True
         )
 
         return results
