@@ -121,9 +121,11 @@ def compute_EVII(action_space, prior_sampling_function, measurement_sampling_fun
 def fast_EVPI(action_space, sampling_function, utility_function, n_samples=int(1e6), report_prepost_freqs=False):
     """Compute EVII using tricks for computational efficiency.
 
-    NOTE: sampling functions must return samples as np.arrays with dimensions (n,d)
+    NOTE:
+    - sampling functions must return samples as np.arrays with dimensions (n,d)
     where n in the number of samples and d is the dimension of the uncertain parameters,
     or (n,) if d=1.
+    - utility functions must be allow vectorised evaluation over thetas.
     """
 
     # 1. Sample from prior distribution of uncertain parameter(s)
@@ -154,6 +156,7 @@ def fast_EVII(action_space, prior_sampling_function, measurement_sampling_functi
     - sampling functions must return samples as np.arrays with dimensions (n,d)
     where n in the number of samples and d is the dimension of the uncertain parameters,
     or (n,) if d=1.
+    - utility functions must be allow vectorised evaluation over thetas.
     - any cached functions must have the cache filled prior to calling this function for
     thread safety reasons.
     """
