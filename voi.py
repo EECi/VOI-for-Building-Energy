@@ -1,5 +1,8 @@
 """Perform VoI calculations for general 1-stage Bayesian decision problem."""
 
+import os
+from multiprocess import Pool
+from functools import partial
 from utils import cached
 import numpy as np
 from tqdm import tqdm
@@ -114,19 +117,70 @@ def compute_EVII(action_space, prior_sampling_function, measurement_sampling_fun
     return EVII, Eu_prior, Eu_preposterior, astar_prior, astar_freq_prepost, prepost_std_error
 
 
-def fast_EVII(action_space, prior_sampling_function, measurement_sampling_function, utility_function, n_prior_samples=int(1e6), n_measurement_samples=int(1e3)):
+
+def fast_EVPI(action_space, sampling_function, utility_function, n_samples=int(1e6), report_prepost_freqs=False):
+    """Compute EVII using tricks for computational efficiency.
+
+    NOTE: sampling functions must return samples as np.arrays with dimensions (n,d)
+    where n in the number of samples and d is the dimension of the uncertain parameters.
+    """
+
+    # 1. Sample from prior distribution of uncertain parameter(s)
+    thetas = sampling_function(n_samples)
+
+    # 2. Perform Prior analysis
+    prior_E_utilities = [np.mean(utility_function(a,thetas.T)) for a in tqdm(action_space)]
+    Eu_prior = np.max(prior_E_utilities)
+    astar_prior = action_space[np.argmax(prior_E_utilities)]
+
+    # 3. Perform Pre-Posterior analysis
+    posterior_utilities_samples = np.array([utility_function(a,thetas.T) for a in tqdm(action_space)]).T
+    pre_posterior_utility_samples = np.max(posterior_utilities_samples,axis=1)
+    Eu_preposterior = np.mean(pre_posterior_utility_samples)
+    astar_freq_prepost = {action_space[val]:count for (val,count) in zip(*np.unique([np.argmax(l) for l in posterior_utilities_samples], return_counts=True))} if report_prepost_freqs else None
+    prepost_std_error = np.std(pre_posterior_utility_samples)/n_samples
+
+    # 4. Compute EVPI
+    EVPI = Eu_preposterior - Eu_prior
+
+    return EVPI, Eu_prior, Eu_preposterior, astar_prior, astar_freq_prepost, prepost_std_error
+
+
+def fast_EVII(action_space, prior_sampling_function, measurement_sampling_function, utility_function, n_prior_samples=int(1e6), n_measurement_samples=int(1e3), report_prepost_freqs=False):
     """Compute EVII using tricks for computational efficiency.
     
     NOTE:
-    - 
+    - sampling functions must return samples as np.arrays with dimensions (n,d)
+    where n in the number of samples and d is the dimension of the uncertain parameters.
+    - any cached functions must have the cache filled prior to calling this function for
+    thread safety reasons.
     """
 
     # 1. Sample from prior distribution of uncertain parameter(s) and obtained measurements
     thetas, zs = prior_sampling_function(n_prior_samples)
 
     # 2. Perform Prior analysis
-    prior_E_utilities = [np.mean([utility_function(a,s) for s in tqdm(thetas)]) for a in action_space]
+    prior_E_utilities = [np.mean(utility_function(a,thetas.T)) for a in tqdm(action_space)]
     Eu_prior = np.max(prior_E_utilities)
     astar_prior = action_space[np.argmax(prior_E_utilities)]
 
-    # reuse expected posterior utility values for measurement samples for computational efficiency, but NOTE statistics implications (correlated samples), okay if MC error low enough
+    # 3. Perform Pre-Posterior analysis
+    def compute_posterior_expected_utilities(z):
+        posterior_samples = measurement_sampling_function(z,n_prior_samples)
+        # reuse posterior samples for computing expected utilities for all actions
+        return [np.mean(utility_function(a,posterior_samples.T)) for a in action_space]
+
+    thinned_zs = [z for z in zs[::n_prior_samples//n_measurement_samples]]
+    with Pool(processes=min(os.cpu_count(),16)) as pool:
+        posterior_expected_utilities_samples = list(tqdm(pool.imap(compute_posterior_expected_utilities, thinned_zs, chunksize=100), total=len(thinned_zs)))
+        pool.close()
+        pool.join()
+    pre_posterior_utility_samples = np.max(posterior_expected_utilities_samples,axis=1)
+    Eu_preposterior = np.mean(pre_posterior_utility_samples)
+    astar_freq_prepost = {action_space[val]:count for (val,count) in zip(*np.unique([np.argmax(l) for l in posterior_expected_utilities_samples], return_counts=True))}  if report_prepost_freqs else None
+    prepost_std_error = np.std(pre_posterior_utility_samples)/n_measurement_samples
+
+    # 4. Compute EVII
+    EVII = Eu_preposterior - Eu_prior
+
+    return EVII, Eu_prior, Eu_preposterior, astar_prior, astar_freq_prepost, prepost_std_error
