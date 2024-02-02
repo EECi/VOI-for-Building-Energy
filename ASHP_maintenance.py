@@ -138,23 +138,26 @@ if __name__ == '__main__':
 
     n_samples = int(1e7)
 
-    results = fast_EVPI(
-        maintenance_freqs,
-        prior_theta_sampler,
-        utility,
-        n_samples=n_samples
-    )
+    for seed in range(5):
+        np.random.seed(seed)
 
-    print("EVPI: ", np.round(results[0],3))
-    print("Expected prior utility: ", np.round(results[1],3))
-    print("Expected pre-posterior utility: ", np.round(results[2],3))
-    print("Prior action decision: ", results[3])
-    print("Pre-posterior action decision counts: ", results[4])
+        results = fast_EVPI(
+            maintenance_freqs,
+            prior_theta_sampler,
+            utility,
+            n_samples=n_samples
+        )
 
-    # save results
-    with open(results_file, 'a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow([*['EVPI' for _ in ['alpha','epsilon','spf_dash']], results[0], results[1], results[2], n_samples])
+        print("EVPI: ", np.round(results[0],3))
+        print("Expected prior utility: ", np.round(results[1],3))
+        print("Expected pre-posterior utility: ", np.round(results[2],3))
+        print("Prior action decision: ", results[3])
+        print("Pre-posterior action decision counts: ", results[4])
+
+        # save results
+        with open(results_file, 'a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow([*['EVPI' for _ in ['alpha','epsilon','spf_dash']], results[0], results[1], results[2], n_samples])
 
 
     print("\nPerforming EVPPI calculations...")
@@ -162,11 +165,11 @@ if __name__ == '__main__':
     parameters = ['alpha', 'epsilon', 'spf_dash', 'elec_unit_cost', 'annual_load']
     combs = [[0],[1],[2],[0,1],[0,2],[1,2],[0,1,2]]
 
-    n_prior_samples = int(1e5)
-    n_measurement_samples = int(1e5)
+    n_prior_samples = int(1e7)
+    n_measurement_samples = int(1e6)
 
     for comb in combs:
-        for seed in range(1):
+        for seed in range(5):
             np.random.seed(seed)
 
             to_measure = [True if i in comb else False for i in range(len(parameters))]
@@ -180,7 +183,8 @@ if __name__ == '__main__':
                 partial_perfect_info_theta_sampler,
                 utility,
                 n_prior_samples=n_prior_samples,
-                n_measurement_samples=n_measurement_samples
+                n_measurement_samples=n_measurement_samples,
+                mproc=False
             )
 
             print("\nMeasured params: %s"%[parameters[i] for i in comb])
