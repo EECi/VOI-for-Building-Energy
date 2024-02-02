@@ -101,9 +101,7 @@ def compute_EVII(action_space, prior_sampling_function, measurement_sampling_fun
     astar_prior = action_space[np.argmax(prior_E_utilities)]
 
     # 3. Perform Pre-Posterior analysis
-    measurement_sampling_function = cached(measurement_sampling_function) # use same posterior samples for calculating expected utilities for each action
-    posterior_expected_utilities = cached(lambda z: [np.mean([utility_function(a,s) for s in measurement_sampling_function(z,n_prior_samples)]) for a in action_space])
-    # reuse expected posterior utility values for measurement samples for computational efficiency, but NOTE statistics implications (correlated samples), okay if MC error low enough
+    posterior_expected_utilities = lambda z: [np.mean([utility_function(a,s) for s in measurement_sampling_function(z,n_prior_samples)]) for a in action_space]
     posterior_expected_utilities_samples = [posterior_expected_utilities(z) for z in tqdm(zs[::n_prior_samples//n_measurement_samples])]
     pre_posterior_utility_samples = [np.max(l) for l in posterior_expected_utilities_samples]
     Eu_preposterior = np.mean(pre_posterior_utility_samples)
@@ -114,3 +112,21 @@ def compute_EVII(action_space, prior_sampling_function, measurement_sampling_fun
     EVII = Eu_preposterior - Eu_prior
 
     return EVII, Eu_prior, Eu_preposterior, astar_prior, astar_freq_prepost, prepost_std_error
+
+
+def fast_EVII(action_space, prior_sampling_function, measurement_sampling_function, utility_function, n_prior_samples=int(1e6), n_measurement_samples=int(1e3)):
+    """Compute EVII using tricks for computational efficiency.
+    
+    NOTE:
+    - 
+    """
+
+    # 1. Sample from prior distribution of uncertain parameter(s) and obtained measurements
+    thetas, zs = prior_sampling_function(n_prior_samples)
+
+    # 2. Perform Prior analysis
+    prior_E_utilities = [np.mean([utility_function(a,s) for s in tqdm(thetas)]) for a in action_space]
+    Eu_prior = np.max(prior_E_utilities)
+    astar_prior = action_space[np.argmax(prior_E_utilities)]
+
+    # reuse expected posterior utility values for measurement samples for computational efficiency, but NOTE statistics implications (correlated samples), okay if MC error low enough
