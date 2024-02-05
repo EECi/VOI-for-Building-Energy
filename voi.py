@@ -177,7 +177,7 @@ def fast_EVII(action_space, prior_sampling_function, measurement_sampling_functi
 
     thinned_zs = [z for z in zs[::n_prior_samples//n_measurement_samples]]
 
-    n_workers = min(os.cpu_count(),16)
+    n_workers = min(2*os.cpu_count(),16)
     if mproc:
         with Pool(processes=n_workers) as pool:
             posterior_expected_utilities_samples = list(tqdm(pool.imap(compute_posterior_expected_utilities, thinned_zs, chunksize=n_workers*5), total=len(thinned_zs)))

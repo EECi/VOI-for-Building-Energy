@@ -8,6 +8,7 @@ import csv
 import json
 import itertools
 from tqdm import tqdm
+import numba
 from utils import cached
 
 import logging
@@ -28,6 +29,11 @@ if __name__ == '__main__':
     prior_sigma = 0.31
     discr_delta = 1e-2
     discr_points = np.round(np.arange(discr_delta,4,discr_delta),6) # discretisation points for ground thermal conductivity
+    discr_bins = np.array([-1*np.inf, *[np.mean(discr_points[i:i+2]) for i in range(len(discr_points)-1)], np.inf])
+
+    @numba.njit(fastmath=True)
+    def discritise_samples(samples, discr_points,bins):
+        return discr_points[(np.digitize(samples,bins)-1)]
 
     # Turn off cmdstan info logging
     stan_log = False
@@ -37,18 +43,17 @@ if __name__ == '__main__':
         logger.propagate = False
         logger.setLevel(logging.WARNING)
 
-    def prior_ks_sampler(n_samples, mu=prior_mu, sigma=prior_sigma, discr_points=discr_points):
+    def prior_ks_sampler(n_samples, mu=prior_mu, sigma=prior_sigma, discr_points=discr_points, discr_bins=discr_bins):
         """Sample values from ground thermal conductivity prior distribution.
         Discretise to enable utility caching for computational efficiency."""
         cont_samples = np.random.normal(mu,sigma,size=n_samples)
-        return np.array([discr_points[np.argmin(np.abs(discr_points-s))] for s in cont_samples])
+        return discritise_samples(cont_samples, discr_points, discr_bins)
 
-    def prior_theta_z_sampler(n_samples, error, mu=prior_mu, sigma=prior_sigma, discr_points=discr_points, thin_factor=10):
+    def prior_theta_z_sampler(n_samples, error, mu=prior_mu, sigma=prior_sigma, discr_points=discr_points, discr_bins=discr_bins, thin_factor=5):
         """Sample theta and z values from prior model of thermal conductivity and measurements."""
         data = {'mu': mu,'sigma': sigma,'error': error}
         prior_stan_model_path = os.path.join('stan_models','GSHP_prior.stan')
         prior_stan_model = CmdStanModel(stan_file=prior_stan_model_path)
-        thin_factor = 10
         prior_fit = prior_stan_model.sample(
             data=data,
             inits={'theta': mu, 'z':mu}, # prevent invalid initial values
@@ -57,13 +62,13 @@ if __name__ == '__main__':
         )
 
         thetas = prior_fit.stan_variable('theta')
-        reduced_thetas = np.array([discr_points[np.argmin(np.abs(discr_points-s))] for s in thetas[::thin_factor]])
+        reduced_thetas = discritise_samples(thetas[::thin_factor],discr_points,discr_bins)
         zs = prior_fit.stan_variable('z')
-        reduced_zs = np.array([discr_points[np.argmin(np.abs(discr_points-s))] for s in zs[::thin_factor]])
+        reduced_zs = discritise_samples(zs[::thin_factor],discr_points,discr_bins)
 
         return reduced_thetas, reduced_zs
 
-    def posterior_theta_sampler(measurement, n_samples, error, mu=prior_mu, sigma=prior_sigma, discr_points=discr_points, thin_factor=10):
+    def posterior_theta_sampler(measurement, n_samples, error, mu=prior_mu, sigma=prior_sigma, discr_points=discr_points, thin_factor=5):
         """Sample theta values from posterior model of thermal conductivity given measurement, z."""
         data = {'mu': mu,'sigma': sigma,'error': error, 'z': measurement}
         post_stan_model_path = os.path.join('stan_models','GSHP_posterior.stan')
@@ -152,7 +157,7 @@ if __name__ == '__main__':
     # 5. Perform VOI calculations
     # ========================================================================
     results_file = os.path.join('results','GSHP_EVII_results.csv')
-    columns = ['error-sigma','EVII','expected_prior_utility','expected_preposterior_utility','n_prior_samples','n_measurement_samples']
+    columns = ['error-sigma','EVII','expected_prior_utility','expected_preposterior_utility','n_prior_samples','n_measurement_samples','prepost_std_error']
     if not os.path.exists(results_file):
         with open(results_file, 'w', newline='') as file:
             writer = csv.writer(file)
@@ -171,7 +176,8 @@ if __name__ == '__main__':
         borehole_lengths,
         prior_ks_sampler,
         vec_utility,
-        n_samples=n_samples
+        n_samples=n_samples,
+        report_prepost_freqs=True
     )
 
     print("EVPI: ", np.round(EVPI_results[0],3))
@@ -188,8 +194,8 @@ if __name__ == '__main__':
 
     print("\nPerforming EVII calculations...")
 
-    n_prior_samples = int(1e5)
-    n_measurement_samples = int(1e5)
+    n_prior_samples = int(5e5)
+    n_measurement_samples = int(5e5)
 
     test_errors = [0.125,0.085,0.05,0.025]
     for error in test_errors:
@@ -203,7 +209,8 @@ if __name__ == '__main__':
             posterior_theta_sampler_with_error,
             vec_utility,
             n_prior_samples=n_prior_samples,
-            n_measurement_samples=n_measurement_samples
+            n_measurement_samples=n_measurement_samples,
+            report_prepost_freqs=True
         )
 
         print("\nMesurement error: %s%%"%np.round(error*100,1))
