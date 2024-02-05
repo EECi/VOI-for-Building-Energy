@@ -50,8 +50,8 @@ if __name__ == '__main__':
         elec_unit_cost_mu = 0.326
         elec_unit_cost_sigma = 0.016
         # annual load - Gaussian
-        annual_load_mu = 12560000
-        annual_load_sigma = 1358000
+        annual_load_mu = 12.56e6
+        annual_load_sigma = 1.358e6
 
         theta_matrix = np.vstack([
             discritise_samples(stats.truncnorm(-1*alpha_mu/alpha_sigma,(1-alpha_mu)/alpha_sigma,loc=alpha_mu,scale=alpha_sigma).rvs(n_samples),alpha_discr_points,alpha_bins), # alpha
