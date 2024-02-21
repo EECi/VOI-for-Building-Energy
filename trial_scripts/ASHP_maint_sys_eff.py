@@ -159,3 +159,41 @@ if __name__ == '__main__':
             writer = csv.writer(file)
             writer.writerow([*['EVPI' for _ in ['alpha','epsilon','spf_dash']], results[0], results[1], results[2], n_samples])
 
+
+    print("\nPerforming EVPPI calculations...")
+
+    parameters = ['alpha', 'epsilon', 'spf_dash', 'elec_unit_cost', 'annual_load']
+    combs = [[0],[1],[2],[0,1],[0,2],[1,2],[0,1,2]]
+
+    n_prior_samples = int(1e7)
+    n_measurement_samples = int(1e6)
+
+    for comb in combs:
+        for seed in range(5):
+            np.random.seed(seed)
+
+            to_measure = [True if i in comb else False for i in range(len(parameters))]
+            perfect_info_params = {param: measure for param, measure in zip(parameters, to_measure)}
+
+            prior_sampler = lambda n_samples: prior_theta_and_partial_perfect_z_sampler(n_samples, perfect_info_params)
+
+            results = fast_EVII(
+                maintenance_freqs,
+                prior_sampler,
+                partial_perfect_info_theta_sampler,
+                utility,
+                n_prior_samples=n_prior_samples,
+                n_measurement_samples=n_measurement_samples,
+                mproc=False
+            )
+
+            print("\nMeasured params: %s"%[parameters[i] for i in comb])
+            print("EVPPI: ", np.round(results[0],3))
+            print("Expected prior utility: ", np.round(results[1],3))
+            print("Expected pre-posterior utility: ", np.round(results[2],3))
+            print("Pre-posterior std error: ", np.round(results[5],3))
+
+            # save results
+            with open(results_file, 'a', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow([*[perfect_info_params[param] for param in ['alpha','epsilon','spf_dash']], results[0], results[1], results[2], n_prior_samples, n_measurement_samples, results[5]])
