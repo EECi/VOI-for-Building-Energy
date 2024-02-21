@@ -118,7 +118,7 @@ def compute_EVII(action_space, prior_sampling_function, measurement_sampling_fun
 
 
 
-def fast_EVPI(action_space, sampling_function, utility_function, n_samples=int(1e6), report_prepost_freqs=False):
+def fast_EVPI(action_space, sampling_function, utility_function, n_samples=int(1e6), report_prepost_freqs=False, return_utility_samples=False):
     """Compute EVII using tricks for computational efficiency.
 
     NOTE:
@@ -146,7 +146,19 @@ def fast_EVPI(action_space, sampling_function, utility_function, n_samples=int(1
     # 4. Compute EVPI
     EVPI = Eu_preposterior - Eu_prior
 
-    return EVPI, Eu_prior, Eu_preposterior, astar_prior, astar_freq_prepost, prepost_std_error
+    # Format results
+    results = [
+        EVPI,
+        Eu_prior,
+        Eu_preposterior,
+        astar_prior,
+        astar_freq_prepost,
+        prepost_std_error
+    ]
+    if return_utility_samples:
+        results.extend([utility_function(astar_prior,thetas.T),pre_posterior_utility_samples])
+
+    return results
 
 
 def fast_EVII(action_space, prior_sampling_function, measurement_sampling_function, utility_function, n_prior_samples=int(1e6), n_measurement_samples=int(1e3), mproc=False, report_prepost_freqs=False):
