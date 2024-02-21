@@ -6,6 +6,9 @@ import csv
 import numpy as np
 import scipy.stats as stats
 
+import matplotlib.pyplot as plt
+import seaborn as sns
+
 import numba
 
 from voi import fast_EVPI, fast_EVII
@@ -127,35 +130,31 @@ if __name__ == '__main__':
 
     # 5. Perform VOI calculations
     # ========================================================================
-    results_file = os.path.join('results','ASHP_EVPPI_results.csv')
-    columns = ['alpha', 'epsilon', 'spf_dash','EVPPI','expected_prior_utility','expected_preposterior_utility','n_prior_samples','n_measurement_samples','prepost_std_error']
-    if not os.path.exists(results_file):
-        with open(results_file, 'w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(columns)
-
     print("\nPerforming EVPI calculation...")
 
     n_samples = int(1e7)
 
-    for seed in range(5):
-        np.random.seed(seed)
+    results = fast_EVPI(
+        maintenance_freqs,
+        prior_theta_sampler,
+        utility,
+        n_samples=n_samples,
+        report_prepost_freqs=True,
+        return_utility_samples=True
+    )
 
-        results = fast_EVPI(
-            maintenance_freqs,
-            prior_theta_sampler,
-            utility,
-            n_samples=n_samples
-        )
+    print("EVPI: ", np.round(results[0],3))
+    print("Expected prior utility: ", np.round(results[1],3))
+    print("Expected pre-posterior utility: ", np.round(results[2],3))
+    print("Prior action decision: ", results[3])
+    print("Pre-posterior action decision counts: ", results[4])
 
-        print("EVPI: ", np.round(results[0],3))
-        print("Expected prior utility: ", np.round(results[1],3))
-        print("Expected pre-posterior utility: ", np.round(results[2],3))
-        print("Prior action decision: ", results[3])
-        print("Pre-posterior action decision counts: ", results[4])
-
-        # save results
-        with open(results_file, 'a', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow([*['EVPI' for _ in ['alpha','epsilon','spf_dash']], results[0], results[1], results[2], n_samples])
-
+    # Plot results
+    clip_lower = -1e7
+    clip_upper = -5e5
+    fig, ax = plt.subplots()
+    sns.histplot(np.clip(results[-2],clip_lower,clip_upper), binwidth=2e4, stat='density', kde=True, ax=ax, label='Prior')
+    #sns.histplot(np.clip(results[-1],clip_lower,clip_upper), binwidth=1e5, stat='density', kde=True, ax=ax, label='Pre-Posterior')
+    plt.xlim(-5e6,-8e5)
+    plt.legend()
+    plt.show()
