@@ -150,11 +150,21 @@ if __name__ == '__main__':
     print("Pre-posterior action decision counts: ", results[4])
 
     # Plot results
+    fig, ax = plt.subplots()
+    colors = ['grey' if i != results[3] else 'k' for i in list(results[4].keys())]
+    sns.barplot(x=list(results[4].keys()),y=np.array(list(results[4].values()))/n_samples, palette=colors, ax=ax)
+    plt.xlabel("Maintenance frequency")
+    plt.ylabel("Propotion of true optimal actions")
+    plt.show()
+
     clip_lower = -1e7
     clip_upper = -5e5
     fig, ax = plt.subplots()
-    sns.histplot(np.clip(results[-2],clip_lower,clip_upper), binwidth=2e4, stat='density', kde=True, ax=ax, label='Prior')
-    #sns.histplot(np.clip(results[-1],clip_lower,clip_upper), binwidth=1e5, stat='density', kde=True, ax=ax, label='Pre-Posterior')
-    plt.xlim(-5e6,-8e5)
-    plt.legend()
+    sns.kdeplot(np.clip(results[-2],clip_lower,clip_upper)/1e6, ax=ax, c='k')
+    plt.vlines(results[1]/1e6,0,1.3,colors='k',linestyles='dashed')
+    plt.text(results[1]/1e6+0.1, 0.4, "Expected prior utility", rotation=90, verticalalignment='center', horizontalalignment='left')
+    plt.xlim(-5,-0.8)
+    plt.ylim(0,1.3)
+    plt.xlabel("Utility (£m/year)")
+    plt.ylabel("Density")
     plt.show()
