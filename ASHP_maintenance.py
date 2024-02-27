@@ -157,12 +157,12 @@ if __name__ == '__main__':
     plt.ylabel("Propotion of true optimal actions")
     plt.show()
 
-    clip_lower = -1e7
+    clip_lower = -7.5e6
     clip_upper = -5e5
     fig, ax = plt.subplots()
-    sns.kdeplot(np.clip(results[-2],clip_lower,clip_upper)/1e6, ax=ax, c='k')
+    sns.kdeplot(np.clip(results[-2],clip_lower,clip_upper)/1e6, ax=ax, c='k',levels=500)
     plt.vlines(results[1]/1e6,0,1.3,colors='k',linestyles='dashed')
-    plt.text(results[1]/1e6+0.1, 0.4, "Expected prior utility", rotation=90, verticalalignment='center', horizontalalignment='left')
+    plt.text(results[1]/1e6+0.05, 0.4, "Expected prior utility", rotation=90, verticalalignment='center', horizontalalignment='left')
     plt.xlim(-5,-0.8)
     plt.ylim(0,1.3)
     plt.xlabel("Utility (£m/year)")
