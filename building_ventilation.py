@@ -5,6 +5,7 @@ import os
 import numpy as np
 
 import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
 import seaborn as sns
 
 from functools import cache
@@ -126,46 +127,117 @@ if __name__ == '__main__':
     print("(Base) Prior action decision: ", base_results[3])
     print("(Base) Pre-posterior action decision counts: ", base_results[4])
 
-    # Plot prior utility distributions for each action
+
+    # 6. Plotting
+    # ========================================================================
+
+    # Compute prior utility distributions for each action and regime change points
     n_staff=100
     thetas = prior_theta_sampler(n_samples=int(1e6), n_staff=n_staff)
     @np.vectorize
     def scenario_utility(ventilation_rates, theta):
         return utility(ventilation_rates, theta, base_floor_area_per_person*n_staff, base_elec_cost, base_N_r, base_InfectionRate)
     a_utils = [scenario_utility(a,thetas.T) for a in ventilation_rates]
+
+    possible_thetas = np.arange(101)
+    astar_by_theta = [ventilation_rates[np.argmax([scenario_utility(a,t) for a in ventilation_rates])] for t in possible_thetas]
+    ystar_by_theta = [np.max([scenario_utility(a,t) for a in ventilation_rates]) for t in possible_thetas]
+    regime_change_utils = []
+    regime_change_thetas = []
+    curr_a_star_theta = ventilation_rates[0]
+    for i,theta in enumerate(possible_thetas):
+        if astar_by_theta[i] != curr_a_star_theta:
+            regime_change_utils.append(np.mean([ystar_by_theta[i],ystar_by_theta[i-1]]))
+            regime_change_thetas.append(possible_thetas[i-1])
+            curr_a_star_theta = astar_by_theta[i]
+    print(regime_change_thetas)
+
+    # Plot prior utility distributions for each action
+    colors = ['xkcd:cerulean','xkcd:grey','xkcd:cerulean','k','xkcd:grey']
+    lss = ['--','--','-','-','-']
     fig, ax = plt.subplots()
     for i,a in enumerate(ventilation_rates):
-        sns.kdeplot(a_utils[i], ax=ax, label=a, cut=0)
+        sns.kdeplot(a_utils[i], ax=ax, label=a, cut=0, c=colors[i], ls=lss[i])
         a_ax = ax.lines[-1]
-        plt.vlines(a_ax.get_xdata()[-1],0,a_ax.get_ydata()[-1],color=a_ax.get_c(),linestyle="--")
+        plt.vlines(a_ax.get_xdata()[-1],0,a_ax.get_ydata()[-1],color=a_ax.get_c(),linestyle=":",alpha=0.5)
+    ax.annotate("", xy=(np.max(a_utils[i]), 0.0275), xytext=(0, 0.0275),
+            arrowprops=dict(
+                arrowstyle="->",
+                color="xkcd:grey"
+                )
+    )
+    ax.text(np.max(a_utils[i])/2,0.0275, "Ventilation cost", verticalalignment='bottom', horizontalalignment='center', color='xkcd:grey', fontsize='x-small')
     plt.xlim(-600,0)
-    # plt.ylim(0,1.3)
     plt.xlabel("Utility (£/day)")
     plt.ylabel("Density")
-    plt.legend(title="Ventilation rate", ncols=5)
-    plt.savefig(os.path.join('plots',"builing_vent_prior_u_dists_by_action.pdf"), format="pdf", bbox_inches="tight")
+    plt.legend(title="Ventilation rate (ACH)", ncols=5, loc='lower center', bbox_to_anchor=(0.5, 1), handletextpad=0.5)
+    plt.savefig(os.path.join('plots',"building_vent_prior_u_dists_by_action.pdf"), format="pdf", bbox_inches="tight")
+    plt.show()
+
+    # Plot utility distributions for prior action and posterior acitons
+    fig, ax = plt.subplots()
+    sns.kdeplot(base_results[-2], ax=ax, label='Prior', cut=0, c='k')
+    a_ax = ax.lines[-1]
+    plt.vlines(a_ax.get_xdata()[-1],0,a_ax.get_ydata()[-1],color=a_ax.get_c(),linestyle=":",alpha=0.5)
+
+    sns.kdeplot(base_results[-1], ax=ax, label='Pre-Posterior', cut=0, c='xkcd:cerulean')
+    a_ax = ax.lines[-1]
+    plt.vlines(a_ax.get_xdata()[-1],0,a_ax.get_ydata()[-1],color=a_ax.get_c(),linestyle=":",alpha=0.5)
+
+    plt.vlines(base_results[1],0,0.025,colors='k',linestyles='dashed',alpha=0.5)
+    plt.text(base_results[1]-2.5, 0.0175, "Expected prior utility", rotation=270, verticalalignment='top', horizontalalignment='right', fontsize='x-small')
+
+    plt.vlines(base_results[2],0,0.025,colors='xkcd:cerulean',linestyles='dashed',alpha=0.5)
+    plt.text(base_results[2]-2.5, 0.0175, "Expected pre-posterior utility", rotation=270, verticalalignment='top', horizontalalignment='right',c='xkcd:cerulean', fontsize='x-small')
+
+    ax.annotate("", xy=(base_results[2], 0.02), xytext=(base_results[1], 0.02),
+            arrowprops=dict(
+                arrowstyle="->",
+                color='r'
+                )
+    )
+    ax.text(np.mean([base_results[1],base_results[2]]),0.02025, "EVPI", verticalalignment='bottom', horizontalalignment='center', color='r', fontsize='small')
+
+    rect0 = Rectangle((0,0),regime_change_utils[0],0.025,color='k',alpha=0.1,lw=0,zorder=0)
+    rect1 = Rectangle((regime_change_utils[1],0),regime_change_utils[2]-regime_change_utils[1],0.025,color='k',alpha=0.1,lw=0,zorder=0)
+    rect2 = Rectangle((regime_change_utils[3],0),-250,0.025,color='k',alpha=0.1,lw=0,zorder=0)
+    ax.add_patch(rect0)
+    ax.add_patch(rect1)
+    ax.add_patch(rect2)
+    ax.text(np.mean([0,regime_change_utils[0]]),0.023, "1", verticalalignment='center', horizontalalignment='center', color='k')
+    for i in range(1,3):
+        ax.text(np.mean([regime_change_utils[i-1],regime_change_utils[i]]),0.023, str(ventilation_rates[i]), verticalalignment='center', horizontalalignment='center', color='k')
+    ax.text(np.mean([regime_change_utils[-2],regime_change_utils[-1]]),0.023, r'$a^*(\theta)=12$', verticalalignment='center', horizontalalignment='center', color='k')
+    ax.text(np.mean([regime_change_utils[-1],-250]),0.023, "20", verticalalignment='center', horizontalalignment='center', color='k')
+
+    plt.xlabel("Utility (£/day)")
+    plt.ylabel("Density")
+    plt.xlim(-250,0)
+    plt.ylim(0,0.025)
+    plt.legend(ncols=2, loc='lower center', bbox_to_anchor=(0.5, 1), handletextpad=0.5)
+    plt.savefig(os.path.join('plots',"building_vent_dists_prior_vs_pre_post.pdf"), format="pdf", bbox_inches="tight")
     plt.show()
 
     # # Calculate EVPI for varying floor area per person
-    # print("\nFloor area per person:")
-    # fapp_values = [5,10,15,20,25] # m^2/person
-    # fapp_results = []
-    # for fapp in fapp_values:
-    #     fapp_results.append(calculate_EVPI(fapp, base_elec_cost, base_N_r, base_InfectionRate))
+    print("\nFloor area per person:")
+    fapp_values = [5,10,15,20,25] # m^2/person
+    fapp_results = []
+    for fapp in fapp_values:
+        fapp_results.append(calculate_EVPI(fapp, base_elec_cost, base_N_r, base_InfectionRate))
 
-    # # Calculate EVPI for varying electricity cost
-    # print("\nElectricity cost:")
-    # elec_cost_values = [0.26,0.28,0.30,0.326,0.35,0.40]
-    # elec_cost_results = []
-    # for elec_cost in elec_cost_values:
-    #     elec_cost_results.append(calculate_EVPI(base_floor_area_per_person, elec_cost, base_N_r, base_InfectionRate))
+    # Calculate EVPI for varying electricity cost
+    print("\nElectricity cost:")
+    elec_cost_values = [0.26,0.28,0.30,0.326,0.35,0.40]
+    elec_cost_results = []
+    for elec_cost in elec_cost_values:
+        elec_cost_results.append(calculate_EVPI(base_floor_area_per_person, elec_cost, base_N_r, base_InfectionRate))
 
-    # # Calculate EVPI for varying N_r
-    # print("\nN_r:")
-    # N_r_values = [0.048,0.484,4.843]
-    # N_r_results = []
-    # for N_r in N_r_values:
-    #     N_r_results.append(calculate_EVPI(base_floor_area_per_person, base_elec_cost, N_r, base_InfectionRate))
+    # Calculate EVPI for varying N_r
+    print("\nN_r:")
+    N_r_values = [0.048,0.484,4.843]
+    N_r_results = []
+    for N_r in N_r_values:
+        N_r_results.append(calculate_EVPI(base_floor_area_per_person, base_elec_cost, N_r, base_InfectionRate))
 
     # Calculate EVPI for varying InfectionRate
     print("\nInfectionRate:")
@@ -174,34 +246,40 @@ if __name__ == '__main__':
     for InfectionRate in InfectionRate_values:
         InfectionRate_results.append(calculate_EVPI(base_floor_area_per_person, base_elec_cost, base_N_r, InfectionRate))
 
-    # # Print results
-    # print("\nVarying floor area per person:")
-    # print(fapp_values)
-    # print([r[0] for r in fapp_results])
-    # print([r[3] for r in fapp_results])
-    # print("\nVarying electricity cost:")
-    # print(elec_cost_values)
-    # print([r[0] for r in elec_cost_results])
-    # print([r[3] for r in elec_cost_results])
-    # print("\nVarying N_r:")
-    # print(N_r_values)
-    # print([r[0] for r in N_r_results])
-    # print([r[3] for r in N_r_results])
+    # Print results
+    print("\nVarying floor area per person:")
+    print(fapp_values)
+    print([r[0] for r in fapp_results])
+    print([r[3] for r in fapp_results])
+    print("\nVarying electricity cost:")
+    print(elec_cost_values)
+    print([r[0] for r in elec_cost_results])
+    print([r[3] for r in elec_cost_results])
+    print("\nVarying N_r:")
+    print(N_r_values)
+    print([r[0] for r in N_r_results])
+    print([r[3] for r in N_r_results])
     print("\nVarying InfectionRate:")
     print(InfectionRate_values)
     print([r[0] for r in InfectionRate_results])
     print([r[3] for r in InfectionRate_results])
 
     # Plot change in prior utility distributions as infrection rate varies
+    colors = ['xkcd:grey','xkcd:cerulean','k','xkcd:grey','xkcd:cerulean','xkcd:grey']
+    lss = ['--','--','-','-','-','-.']
+    alphas = [0.8,0.8,1,0.8,0.8,0.8]
     fig, ax = plt.subplots()
     for i,IR in enumerate(InfectionRate_values):
-        sns.kdeplot(InfectionRate_results[i][-2], ax=ax, label=IR, cut=0)
+        sns.kdeplot(InfectionRate_results[i][-2], ax=ax, label=IR, cut=0, c=colors[i], ls=lss[i], alpha=alphas[i])
         a_ax = ax.lines[-1]
-        plt.vlines(a_ax.get_xdata()[-1],0,a_ax.get_ydata()[-1],color=a_ax.get_c(),linestyle="--")
+        plt.vlines(a_ax.get_xdata()[-1],0,a_ax.get_ydata()[-1],color=a_ax.get_c(),linestyle=":",alpha=0.5)
+    plt.text(-30, 0.0325, r"$a^*=$3", verticalalignment='center', horizontalalignment='right',c='k')
+    plt.text(-50, 0.028, r"$a^*=$6", verticalalignment='center', horizontalalignment='right',c='k')
+    plt.text(-105, 0.0225, r"$a^*=$12", verticalalignment='center', horizontalalignment='right',c='k')
     plt.xlim(-450,0)
-    # plt.ylim(0,1.3)
+    plt.ylim(0,0.035)
     plt.xlabel("Utility (£/day)")
     plt.ylabel("Density")
-    plt.legend(title="Infection rate", ncols=3)
-    plt.savefig(os.path.join('plots',"builing_vent_prior_u_dists_with_InfRate.pdf"), format="pdf", bbox_inches="tight")
+    plt.legend(title="Infection rate", ncols=2, loc='upper left', bbox_to_anchor=(0, 1), handletextpad=0.5)
+    plt.savefig(os.path.join('plots',"building_vent_prior_u_dists_with_InfRate.pdf"), format="pdf", bbox_inches="tight")
     plt.show()
