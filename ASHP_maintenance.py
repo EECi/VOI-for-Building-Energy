@@ -155,6 +155,7 @@ if __name__ == '__main__':
     sns.barplot(x=list(results[4].keys()),y=np.array(list(results[4].values()))/n_samples, palette=colors, ax=ax)
     plt.xlabel("Maintenance frequency")
     plt.ylabel("Propotion of true optimal actions")
+    plt.savefig(os.path.join('plots',"ASHP_posterior_action_freqs.pdf"), format="pdf", bbox_inches="tight")
     plt.show()
 
     clip_lower = -7.5e6
@@ -167,4 +168,5 @@ if __name__ == '__main__':
     plt.ylim(0,1.3)
     plt.xlabel("Utility (£m/year)")
     plt.ylabel("Density")
+    plt.savefig(os.path.join('plots',"ASHP_prior_utility_distribution.pdf"), format="pdf", bbox_inches="tight")
     plt.show()
