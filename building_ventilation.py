@@ -1,8 +1,13 @@
 """Perform EVPI calculation for building ventilation scheduling example."""
 
+from calendar import c
+import os
 import numpy as np
-from functools import cache
 
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from functools import cache
 from voi import fast_EVPI
 
 
@@ -100,7 +105,8 @@ if __name__ == '__main__':
             scenario_theta_sampler,
             scenario_utility,
             n_samples,
-            report_prepost_freqs=True
+            report_prepost_freqs=True,
+            return_utility_samples=True
         )
 
         return results
@@ -120,44 +126,82 @@ if __name__ == '__main__':
     print("(Base) Prior action decision: ", base_results[3])
     print("(Base) Pre-posterior action decision counts: ", base_results[4])
 
-    # Calculate EVPI for varying floor area per person
-    print("\nFloor area per person:")
-    fapp_values = [5,10,15,20,25] # m^2/person
-    fapp_EVPIs = []
-    for fapp in fapp_values:
-        fapp_EVPIs.append(calculate_EVPI(fapp, base_elec_cost, base_N_r, base_InfectionRate)[0])
+    # Plot prior utility distributions for each action
+    n_staff=100
+    thetas = prior_theta_sampler(n_samples=int(1e6), n_staff=n_staff)
+    @np.vectorize
+    def scenario_utility(ventilation_rates, theta):
+        return utility(ventilation_rates, theta, base_floor_area_per_person*n_staff, base_elec_cost, base_N_r, base_InfectionRate)
+    a_utils = [scenario_utility(a,thetas.T) for a in ventilation_rates]
+    fig, ax = plt.subplots()
+    for i,a in enumerate(ventilation_rates):
+        sns.kdeplot(a_utils[i], ax=ax, label=a, cut=0)
+        a_ax = ax.lines[-1]
+        plt.vlines(a_ax.get_xdata()[-1],0,a_ax.get_ydata()[-1],color=a_ax.get_c(),linestyle="--")
+    plt.xlim(-600,0)
+    # plt.ylim(0,1.3)
+    plt.xlabel("Utility (£/day)")
+    plt.ylabel("Density")
+    plt.legend(title="Ventilation rate", ncols=5)
+    plt.savefig(os.path.join('plots',"builing_vent_prior_u_dists_by_action.pdf"), format="pdf", bbox_inches="tight")
+    plt.show()
 
-    # Calculate EVPI for varying electricity cost
-    print("\nElectricity cost:")
-    elec_cost_values = [0.26,0.28,0.30,0.326,0.35,0.40]
-    elec_cost_EVPIs = []
-    for elec_cost in elec_cost_values:
-        elec_cost_EVPIs.append(calculate_EVPI(base_floor_area_per_person, elec_cost, base_N_r, base_InfectionRate)[0])
+    # # Calculate EVPI for varying floor area per person
+    # print("\nFloor area per person:")
+    # fapp_values = [5,10,15,20,25] # m^2/person
+    # fapp_results = []
+    # for fapp in fapp_values:
+    #     fapp_results.append(calculate_EVPI(fapp, base_elec_cost, base_N_r, base_InfectionRate))
 
-    # Calculate EVPI for varying N_r
-    print("\nN_r:")
-    N_r_values = [0.048,0.484,4.843]
-    N_r_EVPIs = []
-    for N_r in N_r_values:
-        N_r_EVPIs.append(calculate_EVPI(base_floor_area_per_person, base_elec_cost, N_r, base_InfectionRate)[0])
+    # # Calculate EVPI for varying electricity cost
+    # print("\nElectricity cost:")
+    # elec_cost_values = [0.26,0.28,0.30,0.326,0.35,0.40]
+    # elec_cost_results = []
+    # for elec_cost in elec_cost_values:
+    #     elec_cost_results.append(calculate_EVPI(base_floor_area_per_person, elec_cost, base_N_r, base_InfectionRate))
+
+    # # Calculate EVPI for varying N_r
+    # print("\nN_r:")
+    # N_r_values = [0.048,0.484,4.843]
+    # N_r_results = []
+    # for N_r in N_r_values:
+    #     N_r_results.append(calculate_EVPI(base_floor_area_per_person, base_elec_cost, N_r, base_InfectionRate))
 
     # Calculate EVPI for varying InfectionRate
     print("\nInfectionRate:")
-    InfectionRate_values = [0.005,0.01,0.02,0.0218,0.03,0.04,0.05]
-    InfectionRate_EVPIs = []
+    InfectionRate_values = [0.005,0.01,0.02,0.03,0.04,0.05]
+    InfectionRate_results = []
     for InfectionRate in InfectionRate_values:
-        InfectionRate_EVPIs.append(calculate_EVPI(base_floor_area_per_person, base_elec_cost, base_N_r, InfectionRate)[0])
+        InfectionRate_results.append(calculate_EVPI(base_floor_area_per_person, base_elec_cost, base_N_r, InfectionRate))
 
-    # Print results
-    print("\nVarying floor area per person:")
-    print(fapp_values)
-    print(fapp_EVPIs)
-    print("\nVarying electricity cost:")
-    print(elec_cost_values)
-    print(elec_cost_EVPIs)
-    print("\nVarying N_r:")
-    print(N_r_values)
-    print(N_r_EVPIs)
+    # # Print results
+    # print("\nVarying floor area per person:")
+    # print(fapp_values)
+    # print([r[0] for r in fapp_results])
+    # print([r[3] for r in fapp_results])
+    # print("\nVarying electricity cost:")
+    # print(elec_cost_values)
+    # print([r[0] for r in elec_cost_results])
+    # print([r[3] for r in elec_cost_results])
+    # print("\nVarying N_r:")
+    # print(N_r_values)
+    # print([r[0] for r in N_r_results])
+    # print([r[3] for r in N_r_results])
     print("\nVarying InfectionRate:")
     print(InfectionRate_values)
-    print(InfectionRate_EVPIs)
+    print([r[0] for r in InfectionRate_results])
+    print([r[3] for r in InfectionRate_results])
+
+    # Plot change in prior utility distributions as infrection rate varies
+    fig, ax = plt.subplots()
+    for i,IR in enumerate(InfectionRate_values):
+        sns.kdeplot(InfectionRate_results[i][-2], ax=ax, label=IR, cut=0)
+        a_ax = ax.lines[-1]
+        plt.vlines(a_ax.get_xdata()[-1],0,a_ax.get_ydata()[-1],color=a_ax.get_c(),linestyle="--")
+    plt.xlim(-450,0)
+    # plt.ylim(0,1.3)
+    plt.xlabel("Utility (£/day)")
+    plt.ylabel("Density")
+    plt.legend(title="Infection rate", ncols=3)
+    plt.savefig(os.path.join('plots',"builing_vent_prior_u_dists_with_InfRate.pdf"), format="pdf", bbox_inches="tight")
+    plt.show()
