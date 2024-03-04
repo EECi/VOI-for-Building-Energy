@@ -52,9 +52,9 @@ if __name__ == '__main__':
         # elec unit cost (£/kWh) - Gaussian
         elec_unit_cost_mu = 0.326
         elec_unit_cost_sigma = 0.016
-        # annual load - Gaussian
-        annual_load_mu = 12.56e6
-        annual_load_sigma = 1.358e6
+        # annual load (kWh/year) - Gaussian
+        annual_load_mu = 12.6e6
+        annual_load_sigma = 1.36e6
 
         theta_matrix = np.vstack([
             discritise_samples(stats.truncnorm(-1*alpha_mu/alpha_sigma,(1-alpha_mu)/alpha_sigma,loc=alpha_mu,scale=alpha_sigma).rvs(n_samples),alpha_discr_points,alpha_bins), # alpha
@@ -114,7 +114,7 @@ if __name__ == '__main__':
         annual_load = theta[4] # kWh/year
 
         # set up cost parameters
-        maint_unit_cost = 552.5*30 # £ per maintainence operation on 10 ASHPs (originally 4 for 1.75GWh/year)
+        maint_unit_cost = 600*30 # £ per maintainence operation on 30 ASHPs (originally 4 for 1.75GWh/year, and £552.5 per ASHP maint)
 
         # compute spf
         beta = compute_beta(maint_freq, epsilon)
