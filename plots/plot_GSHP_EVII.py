@@ -18,7 +18,7 @@ results[0,0] = 0.0 # replace 'EVPI' with 0.0
 error_sigmas = results[:,0].astype(float)
 EVII_values = results[:,1].astype(float)
 
-measurement_costs = [183,1800,5000,10000]
+measurement_costs = [187,1800,5000,10000]
 
 print(error_sigmas, EVII_values)
 
