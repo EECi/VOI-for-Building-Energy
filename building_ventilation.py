@@ -198,9 +198,9 @@ if __name__ == '__main__':
     )
     ax.text(np.mean([base_results[1],base_results[2]]),0.02025, "EVPI", verticalalignment='bottom', horizontalalignment='center', color='r', fontsize='small')
 
-    rect0 = Rectangle((0,0),regime_change_utils[0],0.025,color='k',alpha=0.1,lw=0,zorder=0)
-    rect1 = Rectangle((regime_change_utils[1],0),regime_change_utils[2]-regime_change_utils[1],0.025,color='k',alpha=0.1,lw=0,zorder=0)
-    rect2 = Rectangle((regime_change_utils[3],0),-250,0.025,color='k',alpha=0.1,lw=0,zorder=0)
+    rect0 = Rectangle((0,0),regime_change_utils[0],0.025,color='xkcd:cerulean',alpha=0.1,lw=0,zorder=0)
+    rect1 = Rectangle((regime_change_utils[1],0),regime_change_utils[2]-regime_change_utils[1],0.025,color='xkcd:cerulean',alpha=0.1,lw=0,zorder=0)
+    rect2 = Rectangle((regime_change_utils[3],0),-250,0.025,color='xkcd:cerulean',alpha=0.1,lw=0,zorder=0)
     ax.add_patch(rect0)
     ax.add_patch(rect1)
     ax.add_patch(rect2)
