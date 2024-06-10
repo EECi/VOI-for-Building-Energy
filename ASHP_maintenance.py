@@ -152,9 +152,9 @@ if __name__ == '__main__':
     # Plot results
     fig, ax = plt.subplots()
     colors = ['grey' if i != results[3] else 'k' for i in list(results[4].keys())]
-    sns.barplot(x=list(results[4].keys()),y=np.array(list(results[4].values()))/n_samples, palette=colors, ax=ax)
-    plt.xlabel("Maintenance frequency")
-    plt.ylabel("Propotion of true optimal actions")
+    sns.barplot(x=list(results[4].keys()),y=np.array(list(results[4].values()))/n_samples*100, palette=colors, ax=ax)
+    plt.xlabel("Optimal maintenance frequency after uncertainty revealed")
+    plt.ylabel("Percentage of cases with true optimal action")
     plt.savefig(os.path.join('plots',"ASHP_posterior_action_freqs.pdf"), format="pdf", bbox_inches="tight")
     plt.show()
 
