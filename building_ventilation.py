@@ -2,6 +2,7 @@
 
 from calendar import c
 import os
+import csv
 import numpy as np
 
 import matplotlib.pyplot as plt
@@ -107,7 +108,7 @@ if __name__ == '__main__':
             scenario_utility,
             n_samples,
             report_prepost_freqs=True,
-            return_utility_samples=True
+            report_sample_info=True
         )
 
         return results
@@ -126,6 +127,18 @@ if __name__ == '__main__':
     print("(Base) Expected pre-posterior utility: ", np.round(base_results[2],3))
     print("(Base) Prior action decision: ", base_results[3])
     print("(Base) Pre-posterior action decision counts: ", base_results[4])
+
+    # Save results
+    results_file = os.path.join('results','building_ventilation_results.csv')
+    sample_cutoff = int(1e4)
+    with open(results_file, 'a', newline='') as file:
+        writer = csv.writer(file)
+        header = ['Sample no.','Theta sample','Prior action','Prior utility','Posterior action','Posterior utility']
+        writer.writerow(header)
+        for i in range(sample_cutoff):
+            row = [i, base_results[6][i], base_results[3], base_results[7][i], base_results[8][i], base_results[9][i]]
+            writer.writerow(row)
+        writer.writerow([f'results trunacted - {sample_cutoff}/{int(1e6)}']*len(header))
 
 
     # 6. Plotting
@@ -268,13 +281,13 @@ if __name__ == '__main__':
     print([r[1] for r in InfectionRate_results])
     print([r[3] for r in InfectionRate_results])
 
-    # Plot change in prior utility distributions as infrection rate varies
+    # Plot change in prior utility distributions as infection rate varies
     colors = ['xkcd:grey','xkcd:cerulean','k','xkcd:grey','xkcd:cerulean','xkcd:grey']
     lss = ['--','--','-','-','-','-.']
     alphas = [0.8,0.8,1,0.8,0.8,0.8]
     fig, ax = plt.subplots()
     for i,IR in enumerate(InfectionRate_values):
-        sns.kdeplot(InfectionRate_results[i][-2], ax=ax, label=IR, cut=0, c=colors[i], ls=lss[i], alpha=alphas[i])
+        sns.kdeplot(InfectionRate_results[i][7], ax=ax, label=IR, cut=0, c=colors[i], ls=lss[i], alpha=alphas[i])
         a_ax = ax.lines[-1]
         plt.vlines(a_ax.get_xdata()[-1],0,a_ax.get_ydata()[-1],color=a_ax.get_c(),linestyle=":",alpha=0.5)
     plt.text(-30, 0.0325, r"$a^*=$3", verticalalignment='center', horizontalalignment='right',c='k')

@@ -140,7 +140,7 @@ if __name__ == '__main__':
         utility,
         n_samples=n_samples,
         report_prepost_freqs=True,
-        return_utility_samples=True
+        report_sample_info=True
     )
 
     print("EVPI: ", np.round(results[0],3))
@@ -148,6 +148,18 @@ if __name__ == '__main__':
     print("Expected pre-posterior utility: ", np.round(results[2],3))
     print("Prior action decision: ", results[3])
     print("Pre-posterior action decision counts: ", results[4])
+
+    # Save results
+    results_file = os.path.join('results','ASHP_maintenance_results.csv')
+    sample_cutoff = int(1e4)
+    with open(results_file, 'a', newline='') as file:
+        writer = csv.writer(file)
+        header = ['Sample no.','Theta sample','Prior action','Prior utility','Posterior action','Posterior utility']
+        writer.writerow(header)
+        for i in range(sample_cutoff):
+            row = [i, results[6][i], results[3], results[7][i], results[8][i], results[9][i]]
+            writer.writerow(row)
+        writer.writerow([f'results trunacted - {sample_cutoff}/{n_samples}']*len(header))
 
     # Plot results
     fig, ax = plt.subplots()
@@ -161,7 +173,7 @@ if __name__ == '__main__':
     clip_lower = -7.5e6
     clip_upper = -5e5
     fig, ax = plt.subplots()
-    sns.kdeplot(np.clip(results[-2],clip_lower,clip_upper)/1e6, ax=ax, c='k',levels=500)
+    sns.kdeplot(np.clip(results[7],clip_lower,clip_upper)/1e6, ax=ax, c='k',levels=500)
     plt.vlines(results[1]/1e6,0,1.3,colors='k',linestyles='dashed')
     plt.text(results[1]/1e6+0.05, 0.4, "Expected prior utility", rotation=90, verticalalignment='center', horizontalalignment='left')
     plt.xlim(-5,-0.8)

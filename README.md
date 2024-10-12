@@ -27,6 +27,7 @@ This repository contains:
 - The `stan_models` directory, containing [Stan](https://github.com/stan-dev/stan) implementations of the probabilistic models used in the GSHP design example.
 - The `data` directory, containing input data and cached utility evaluations for the GHSP design example.
 - The `models` directory, containing an energy simulation model for the example GSHP system.
+- The `results` directory, containing the numerical results of the sampling and evaluations used to perform the VoI calculations.
 - The `plots` directory, containing code to produce the influence diagram figures for each example problem.
 - The `trial_scipts` directory, containing scripts used for development and checking.
 - A helpful caching function wrapper in `utils/caching.py`
