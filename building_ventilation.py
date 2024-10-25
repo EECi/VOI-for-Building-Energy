@@ -184,7 +184,7 @@ if __name__ == '__main__':
     plt.xlabel("Utility (£/day)")
     plt.ylabel("Density")
     plt.legend(title="Ventilation rate (ACH)", ncols=5, loc='lower center', bbox_to_anchor=(0.5, 1), handletextpad=0.5)
-    plt.savefig(os.path.join('plots',"building_vent_prior_u_dists_by_action.pdf"), format="pdf", bbox_inches="tight")
+    plt.savefig(os.path.join('plots',"building_vent_prior_u_dists_by_action.tif"), format="tif", dpi=1000, bbox_inches="tight")
     plt.show()
 
     # Plot utility distributions for prior action and posterior acitons
@@ -228,7 +228,7 @@ if __name__ == '__main__':
     plt.xlim(-250,0)
     plt.ylim(0,0.025)
     plt.legend(ncols=2, loc='lower center', bbox_to_anchor=(0.5, 1), handletextpad=0.5)
-    plt.savefig(os.path.join('plots',"building_vent_dists_prior_vs_pre_post.pdf"), format="pdf", bbox_inches="tight")
+    plt.savefig(os.path.join('plots',"building_vent_dists_prior_vs_pre_post.tif"), format="tif", dpi=1000, bbox_inches="tight")
     plt.show()
 
     # # Calculate EVPI for varying floor area per person
@@ -298,5 +298,5 @@ if __name__ == '__main__':
     plt.xlabel("Utility (£/day)")
     plt.ylabel("Density")
     plt.legend(title="Infection rate", ncols=2, loc='upper left', bbox_to_anchor=(0, 1), handletextpad=0.5)
-    plt.savefig(os.path.join('plots',"building_vent_prior_u_dists_with_InfRate.pdf"), format="pdf", bbox_inches="tight")
+    plt.savefig(os.path.join('plots',"building_vent_prior_u_dists_with_InfRate.tif"), format="tif", dpi=1000, bbox_inches="tight")
     plt.show()

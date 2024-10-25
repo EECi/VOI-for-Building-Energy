@@ -52,5 +52,5 @@ handlestwin, labelstwin = twinax.get_legend_handles_labels()
 handles = handlesax + handlestwin
 labels = labelsax + labelstwin
 plt.legend(handles, labels, loc='lower center', bbox_to_anchor=(0.5, 1), ncol=2, handletextpad=0.1)
-plt.savefig(os.path.join('plots',"GSHP_EVIIs.pdf"), format="pdf", bbox_inches="tight")
+plt.savefig(os.path.join('plots',"GSHP_EVIIs.tif"), format="tif", dpi=1000, bbox_inches="tight")
 plt.show()
