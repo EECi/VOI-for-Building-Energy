@@ -1,6 +1,6 @@
-# Rationalising data collection for building energy systems using Value of Information Analysis
+# Rationalising data collection for supporting decision making in building energy systems using value of information analysis
 
-This repository supports the article 'Rationalising data collection for building energy systems using Value of Information Analysis', available at [https://arxiv.org/abs/2409.00049](https://arxiv.org/abs/2409.00049).
+This repository supports the article 'Rationalising data collection for supporting decision making in building energy systems using value of information analysis', published by the Journal of Building Performance Simulation on 5th Nov 2024. It is available online at [https://www.tandfonline.com/doi/full/10.1080/19401493.2024.2423827](https://www.tandfonline.com/doi/full/10.1080/19401493.2024.2423827).
 It provides the code used to perform the Value of Information (VoI) calculations for the example problems presented in the paper.
 
 ## Technical Requirements
